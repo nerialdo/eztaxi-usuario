@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1054676875897",
+    "project_id": "extaxi-50c37",
+    "storage_bucket": "extaxi-50c37.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1054676875897:android:cb6e5caf2369be434fb2a8",
+        "android_client_info": {
+          "package_name": "br.com.eztaxi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1054676875897-p7mp2adga61ph9nk9kromupplhbhofls.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDboSZfUAMSCWKZcVbqw6bFZlKZKa0AHqA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1054676875897-p7mp2adga61ph9nk9kromupplhbhofls.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

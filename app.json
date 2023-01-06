@@ -1,0 +1,80 @@
+{
+  "expo": {
+    "name": "eztaxi",
+    "slug": "eztaxi",
+    "scheme": "eztaxi",
+    "version": "1.0.19",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "J4LAQ6SFSB.br.com.eztaxi",
+      "usesAppleSignIn": true,
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "requireFullScreen": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "O EzTaxi acessa sua camera para fotos do perfil.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "O EzTaxi acessa a sua localização para exibir motoristas disponíveis, calcular rotas e enviar sua localçiazação para o motorista.",
+        "NSLocationAlwaysUsageDescription": "O EzTaxi acessa a sua localização para exibir motoristas disponíveis, calcular rotas e enviar sua localçiazação para o motorista.",
+        "NSLocationWhenInUseUsageDescription": "O EzTaxi acessa a sua localização para exibir motoristas disponíveis, calcular rotas e enviar sua localçiazação para o motorista."
+      }
+    },
+    "android": {
+      "package": "br.com.eztaxi",
+      "versionCode": 9,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#fcf800"
+      },
+      "googleServicesFile": "./google-services.json",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAQAGqFeeThBCPGZznbTg6QpcutU1nrDXA"
+        }
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/favicon.png",
+          "color": "#ffffff",
+          "sounds": [
+            "./assets/notificacoes/sound1.wav"
+          ]
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O EzTaxi acessa suas fotos para permitir que você adicione fotos no perfil"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "d6735daf-d480-4756-9bd7-e62d587a81db"
+      }
+    }
+  }
+}
