@@ -18,7 +18,7 @@ const Details = ({distancia, navigation, destination, duration, abrirConfirmacao
 
   useEffect(() => {
     buscarMotoristaLivre()
-    console.log('*** motoristaLivre', motoristaLivre, distancia, yourLocation)
+    console.log('*** motoristaLivre', motoristaLivre, distancia, yourLocation, destination)
 
   }, [])
 
@@ -125,6 +125,9 @@ const Details = ({distancia, navigation, destination, duration, abrirConfirmacao
                 </Text>
                 <Text style={{fontWeight:'normal', textAlign: 'center'}} numberOfLines={1}>
                   De: {yourLocation}
+                </Text>
+                <Text style={{fontWeight:'normal', textAlign: 'center'}} numberOfLines={1}>
+                  Para: {destination.title}
                 </Text>
             </View>
         </View>

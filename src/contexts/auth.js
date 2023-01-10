@@ -154,43 +154,15 @@ export const AuthProvider = ({children}) => {
           clientId: '741352224001-9b8pjmsf756mtitpjdfes7092310ar0j.apps.googleusercontent.com',
         },
     );
-   
-    // const [request, response, promptAsync] = Google.useAuthRequest({
-    //     expoClientId: '1054676875897-l073nc746ut23cjgpcu13vhg385hjqn6.apps.googleusercontent.com',
-    //     // iosClientId: '1054676875897-n6esfi690omlnrbhjao1bjej9vjgo0lr.apps.googleusercontent.com',
-    //     androidClientId: '1054676875897-r4vr9umdcaj38ik8khlottcvfvhrv7l0.apps.googleusercontent.com',
-    //     webClientId: '1054676875897-l073nc746ut23cjgpcu13vhg385hjqn6.apps.googleusercontent.com',
-    // });
-
-    // React.useEffect(() => {
-    //     console.log('response?.type ', response?.type)
-    //     alert('useEffect ' + response?.type)
-    //     if (response?.type === 'success') {
-    //         alert('success')
-    //         const { authentication } = response;
-    //         console.log('authentication', authentication.accessToken)
-    //         loadProfile(authentication.accessToken)
-    //     }
-    //     if(response?.type === 'error'){
-    //         console.log('Não permitido')
-    //         alert('error')
-    //         setLoading(false)
-    //     }
-    //     if(response?.type === 'cancel'){
-    //         alert('cancel')
-    //         console.log('Cancelado pelo usuário')
-    //         setLoading(false)
-    //     }
-    //     if(response?.type === 'dismiss'){
-    //         alert('dismiss')
-    //         setLoading(false)
-    //         signOut2()
-    //     }
-            
-    // }, [response]);
 
     useEffect(() => {
-        
+        const interval = setInterval(() => {
+            carregarLocalizazao()
+        }, 60 * 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
         if (response?.type === 'success') {
           const { id_token } = response.params;
           console.log('aaaa', id_token)
@@ -244,23 +216,10 @@ export const AuthProvider = ({children}) => {
     useEffect(() => {
         //verificar se usuario está definido
         // navigation.navigate('Chat');
-        console.log('1° Carregamento')
+        //console.log('1° Carregamento')
         // schedulePushNotification('ExponentPushToken[Zr8OhHOyZ5tllZtWeTUuOj]', 'Mensagem do passageiro', 'text')
         try {
-            async function verific(){
-                const token = await AsyncStorage.getItem('@RNAuth:token')
-                if(token){
-                    console.log('token 1° useEffect', token)
-                    userLogado(token)
-                }else{
-                    console.log('Não está logado')
-                    setUser(null)
-                    setCompletarPerfil(false)
-                    setLoading(false)
-                }
-            }
             verific()
-            
         } catch (error) {
             console.log('error useEffect auth', error)
             alert('Error useEffect auth' + error.toString())
@@ -269,16 +228,31 @@ export const AuthProvider = ({children}) => {
         // return () => verific().abort();
     }, [])
 
-    useEffect(() => {
-        (async () => {
-          let { status } = await Location.requestForegroundPermissionsAsync();
+    async function verific(){
+        const token = await AsyncStorage.getItem('@RNAuth:token')
+        if(token){
+            //console.log('token 1° useEffect', token)
+            userLogado(token)
+        }else{
+            console.log('Não está logado')
+            setUser(null)
+            setCompletarPerfil(false)
+            setLoading(false)
+        }
+    }
+
+    async function carregarLocalizazao(){
+        let { status } = await Location.requestForegroundPermissionsAsync();
           if (status !== 'granted') {
             setErrorMsg('Permission to access location was denied');
             return;
           }
     
-          let locationGeo = await Location.getCurrentPositionAsync({});
-        //   console.log('location', locationGeo)
+          let locationGeo = await Location.getCurrentPositionAsync({
+            //accuracy: Location.Accuracy.BestForNavigation,
+            //distanceInterval: 5
+          });
+          console.log('location =======================================', locationGeo)
         //   console.log('location', locationGeo.coords)
           setLocation(location);
           setRegion({
@@ -313,8 +287,7 @@ export const AuthProvider = ({children}) => {
 
           console.log('if', cidadeEstado)
           setLocation(address.substring(0, address.indexOf(",")))
-        })();
-    }, []);
+    }
 
 
     async function schedulePushNotificationLocal(title, body) {
@@ -577,7 +550,7 @@ export const AuthProvider = ({children}) => {
     // fim chat
 
     async function userLogado(token){
-        console.log('Platform.OS' ,Platform.OS)
+        //console.log('Platform.OS' ,Platform.OS)
         try {
 
             if(Platform.OS === 'ios'){
@@ -601,7 +574,7 @@ export const AuthProvider = ({children}) => {
                 const response = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?alt=json&access_token=${token}`);
                 const userInfo = await response.json();
                 // var texto = JSON.stringify(userInfo);
-                console.log('dados do usuario logado', userInfo);
+                //console.log('dados do usuario logado', userInfo);
                 // alert('userLogado dados do usuario ' + texto)
                 setUser(userInfo)
                 if(userInfo.error?.status === 'UNAUTHENTICATED'){
@@ -942,7 +915,7 @@ export const AuthProvider = ({children}) => {
                     setSemMotorista(false)
                 }else {
                     querySnapshot.forEach((doc) => {
-                        console.log(doc.id, ' => ********** buscarMotoristaLivre', doc.data());
+                        //console.log(doc.id, ' => ********** buscarMotoristaLivre', doc.data());
                         dadosMotoristas.push(doc.data())
                     });
                     setMotoristaLivre(dadosMotoristas)
@@ -1059,7 +1032,7 @@ export const AuthProvider = ({children}) => {
         setLoadi(true)
         setLoading(true)
         // // console.log('submiting with ', data);
-        // console.log('===> dados user passado da função updateUser', id, data, token)
+         console.log('===> dados user passado da função updateUser', id, data, token)
         try {
             // imagemPerfil ? uploadImage(imagemPerfil, imageMeta) : '';
             const userRef = doc(db, "users", id);
@@ -1068,7 +1041,8 @@ export const AuthProvider = ({children}) => {
                 contato: data.contato,
                 tokenPush: token
             });
-            // console.log('Usuário editado com sucesso')
+            console.log('Usuário editado com sucesso')
+            verific()
             setLoadi(false)
             setLoading(false)
             if(data.nome){
@@ -1091,7 +1065,7 @@ export const AuthProvider = ({children}) => {
             querySnapshot.forEach((doc) => {
                 setConfig(doc.data())
                 res = doc.data()
-                // console.log('res config', res)
+                //console.log('res config', res)
             });
         } catch (error) {
             console.log('Erro ao buscar config ', error)
@@ -1101,8 +1075,8 @@ export const AuthProvider = ({children}) => {
             const querySnapshot = await getDocs(q);
             // console.log('querySnapshot', querySnapshot, querySnapshot.size)
             querySnapshot.forEach((doc) => {
-                // console.log("buscarDadosUser =>", doc.id, " => ", doc.data());
-                updateUser(doc.id, {'nome': doc.data().name, 'contato': doc.data().contato })
+                //console.log("buscarDadosUser =>", doc.id, " => ", doc.data());
+                //updateUser(doc.id, {'nome': doc.data().name, 'contato': doc.data().contato })
                 setLoading(false)
                 setUser(doc.data())
                 addAsync(doc.data())
@@ -1151,6 +1125,7 @@ export const AuthProvider = ({children}) => {
         ))
 
         console.log('Passou no addAsync')
+        carregarLocalizazao()
         
         // const value = await AsyncStorage.getItem('@RNAuth:user')
         // console.log('AsyncStorage.setItem', JSON.parse(value))
@@ -1184,7 +1159,7 @@ export const AuthProvider = ({children}) => {
                             tokenPush: token,
                             primaira_corrida: true, // se não tiver cadastro, se acrescenta 
                             provedor,
-                            contato: ''
+                            //contato: ''
                             // tipoUsuario: usuarioDefinido
                             }, { merge: true });
 
@@ -1203,7 +1178,7 @@ export const AuthProvider = ({children}) => {
                             id: info.id,
                             tokenPush: token,
                             provedor,
-                            contato: ''
+                            //contato: ''
                             // tipoUsuario: usuarioDefinido
                             }, { merge: true });
 
@@ -1613,8 +1588,9 @@ async function registerForPushNotificationsAsync() {(0)
           return;
         }
         token = (await Notifications.getExpoPushTokenAsync()).data;
-        console.log("Token notificarion", token);
+        //console.log("Token notificarion", token);
     } catch (error) {
+        console.log('Falha ao obter token push para notificação push! ', error. error.messages)
         alert('Falha ao obter token push para notificação push! ' + error.toString())
     }
 //   } else {0

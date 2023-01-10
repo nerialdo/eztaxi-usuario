@@ -134,11 +134,11 @@ const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
     }
 
     const onRegionChange = (region) => {
-        // console.log('Region ', region)
+        console.log('Region  no map', region)
     }
 
     const handleLocationSelected = (data, { geometry }) => {
-        // console.log('handleLocationSelected', data, geometry)
+        //console.log('handleLocationSelected', data, geometry)
         const {location: { lat: latitude, lng: longitude }} = geometry;
         handleMenuTop()
         setDestination({
@@ -146,6 +146,20 @@ const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
             longitude,
             title: data.structured_formatting.main_text,
             title_secondary: data.structured_formatting.secondary_text,
+        })
+    }
+
+    const handleLocationPoiClick = (e) => {
+        const {coordinate: { latitude: latitude, longitude: longitude }, name} = e.nativeEvent;
+        //console.log('handleLocationPoiClick', e.nativeEvent, latitude, longitude, name)
+        handleMenuTop()
+        handleBack()
+        
+        setDestination({
+            latitude,
+            longitude,
+            title: name,
+            title_secondary: name,
         })
     }
 
@@ -181,10 +195,18 @@ const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
                 <MapView
                     style={styles.map}
                     region={region}
-                    onRegionChange={onRegionChange}
+                    //onMapReady={ ( e ) => { console.log('onMapReady ', e) }}
+                    //onKmlReady={ ( e ) => { console.log('onKmlReady ', e) }}
+                    //onRegionChange={onRegionChange}
+                    //onRegionChangeComplete={ ( e ) => { console.log('onRegionChangeComplete ', e) }}
+                    //onUserLocationChange={ ( e ) => { console.log('onUserLocationChange ', e.nativeEvent) }}
                     mapType={'standard'}
                     showsUserLocation
+                    showsMyLocationButton={true}
                     loadingEnabled
+                    provider={"google"}
+                    showsTraffic={true}
+                    showsBuildings={true}
                     styles={{
                         textInputContainer: {
                         backgroundColor: 'grey',
@@ -198,6 +220,10 @@ const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
                         color: '#1faadb',
                         },
                     }}
+                    //onPress={(e) => console.log('eeee', e)}
+                    onPoiClick={handleLocationPoiClick}
+                    onMarkerPress={(e) => console.log('onMarkerPress', e)}
+                    onCalloutPress={(e) => console.log('onCalloutPress', e)}
                     ref={map}
                 >
                      {destination && (

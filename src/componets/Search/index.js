@@ -15,7 +15,7 @@ const Search = ({ onLocationSelected, yourLocation, primeiraCorrida }) => {
 
     const homePlace = {
       description: 'Casa',
-      geometry: { location: { lat: 48.8152937, lng: 2.4597668 } },
+      geometry: { location: { lat: -2.5157602115976707, lng: 2.4597668 } },
     };
     const workPlace = {
       description: 'Trabalho',
@@ -42,12 +42,18 @@ const Search = ({ onLocationSelected, yourLocation, primeiraCorrida }) => {
           <Text numberOfLines={1}>{yourLocation}</Text>
         </View>
         <GooglePlacesAutocomplete
-          placeholder="Para onde?"
+          placeholder="Digie o endereço ou clique no destino"
           placeholderTextColor="#333"
+          minLength={2} // minimum length of text to search
+          autoFocus={false}
+          returnKeyType={'search'} // Can be left out for default return key https://facebook.github.io/react-native/docs/textinput.html#returnkeytype
+          renderDescription={row => row.description} // custom description renderZ
+          nearbyPlacesAPI="GooglePlacesSearch"
+          debounce={200}
           onPress={onLocationSelected}
           currentLocationLabel={'Sua localização'}
-          currentLocation={true}
-          predefinedPlacesAlwaysVisible={true}
+          //currentLocation={true}
+          enableHighAccuracyLocation={true}
           autoFillOnNotFound={true}
           // returnKeyType = "next"
           // numberOfLines={1}
@@ -56,6 +62,13 @@ const Search = ({ onLocationSelected, yourLocation, primeiraCorrida }) => {
             language: "br",
             components: 'country:br',
           }}
+          GoogleReverseGeocodingQuery={{
+            // available options for GoogleReverseGeocoding API : https://developers.google.com/maps/documentation/geocoding/intro
+          }}
+          GooglePlacesSearchQuery={{
+            // available options for GooglePlacesSearch API : https://developers.google.com/places/web-service/search
+            rankby: 'distance',
+          }}
           textInputProps={{
             onFocus: () => {
               setSearchFocused(true);
@@ -63,20 +76,25 @@ const Search = ({ onLocationSelected, yourLocation, primeiraCorrida }) => {
             onBlur: () => {
               setSearchFocused(false)
             },
+            getCurrentLocation: () => {
+              console.log('******')
+            },
             autoCapitalize: "none",
-            autoCorrect: false
+            autoCorrect: false,
           }}
           // listViewDisplayed
           fetchDetails={true}
           filterReverseGeocodingByTypes={['locality', 'administrative_area_level_3']}
-          // GooglePlacesSearchQuery={ {rankby: 'distance', type: 'restaurant'} }
+          //GooglePlacesSearchQuery={ {rankby: 'distance', type: 'restaurant'} }
           enablePoweredByContainer={false}
           isRowScrollable={true}
           // keepResultsAfterBlur={true}
           listUnderlayColor={'blue'}
-          // predefinedPlaces={[homePlace, workPlace]}
+          //predefinedPlaces={[homePlace, workPlace]}
+          //predefinedPlacesAlwaysVisible={true}
           ListEmptyComponent={EmptyListMessage}
           onNotFound={EmptyListMessage}
+          textInputHide={false}
           styles={{
             container: {
               flex: 1,
