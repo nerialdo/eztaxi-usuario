@@ -24,7 +24,16 @@ import motoPng from '../../../assets/moto.png';
 
 const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
 
-    const {region, location, yourLocation, salvarOrder, user, buscarMotoristaLivre, motoristaLivre, primeiraCorrida} = useAuth()
+    const {
+        region, location, yourLocation, salvarOrder, 
+        user, buscarMotoristaLivre, 
+        motoristaLivre, 
+        primeiraCorrida,
+        mudarLocalizacaoAtual,
+        mudarLocalizacao,
+        carregarLocalizazao,
+        atualizaLocalizacaoAtual
+    } = useAuth()
     
     // const isFocused = useIsFocused();
     // const [region, setRegion] = useState(null)
@@ -148,19 +157,44 @@ const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
             title_secondary: data.structured_formatting.secondary_text,
         })
     }
+   
+    const handleLocationMudadoSelected = (data, { geometry }) => {
+        // alert(`aqui`)
+        console.log('onLocationMudadoSelected', data, geometry)
+        const {location: { lat: latitude, lng: longitude }} = geometry;
+        // handleMenuTop()
+        atualizaLocalizacaoAtual({location:{ lat: latitude, lng: longitude }, name: data.structured_formatting.main_text})
+        // setDestination({
+        //     latitude,
+        //     longitude,
+        //     title: data.structured_formatting.main_text,
+        //     title_secondary: data.structured_formatting.secondary_text,
+        // })
+    }
 
     const handleLocationPoiClick = (e) => {
         const {coordinate: { latitude: latitude, longitude: longitude }, name} = e.nativeEvent;
-        //console.log('handleLocationPoiClick', e.nativeEvent, latitude, longitude, name)
-        handleMenuTop()
-        handleBack()
-        
-        setDestination({
-            latitude,
-            longitude,
-            title: name,
-            title_secondary: name,
-        })
+        console.log('handleLocationPoiClick', latitude, longitude, name, mudarLocalizacao)
+        if(mudarLocalizacao){
+            atualizaLocalizacaoAtual(e.nativeEvent)
+            console.log('======>', latitude, longitude, name)
+            // setDestination({
+            //     latitude,
+            //     longitude,
+            //     title: name,
+            //     title_secondary: name,
+            // })
+        }else{
+            handleMenuTop()
+            handleBack()
+            
+            setDestination({
+                latitude,
+                longitude,
+                title: name,
+                title_secondary: name,
+            })
+        }
     }
 
     const handleBack = () => {
@@ -191,6 +225,7 @@ const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
 
     return (
         <View style={styles.container}>
+            <Text>testeoosososoo{destination?.latitude}</Text>
             {region && (
                 <MapView
                     style={styles.map}
@@ -226,11 +261,12 @@ const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
                     onCalloutPress={(e) => console.log('onCalloutPress', e)}
                     ref={map}
                 >
+                    
                      {destination && (
                          <>
                             <Directions 
                                 origin={{latitude: region.latitude, longitude: region.longitude}}
-                                destination={{latitude: destination.latitude, longitude: destination.longitude}}
+                                destination={{latitude: destination?.latitude, longitude: destination?.longitude}}
                                 onReady={result => {
                                     // console.log('DADOS DA VIAGEM', result, region, destination)
                                     // console.log(`Distance: ${result.distance} km`)
@@ -254,14 +290,14 @@ const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
                                 image={markerImage}
                             >
                                 <LocationBox>
-                                    <LocationText>{destination.title}</LocationText>
+                                    <LocationText>{destination?.title}</LocationText>
                                 </LocationBox>
                             </Marker>
                             <Marker coordinate={region} anchor={{ x: 0, y: 0 }}>
                                 <LocationBox>
                                     <LocationText>{location}</LocationText>
                                 </LocationBox>
-                            </Marker>
+                            </Marker> 
                          </>
                      )}
                      {motoristaLivre?.map((item, key) => (
@@ -308,7 +344,15 @@ const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
             </>
             : 
             <>
-                <Search onLocationSelected={handleLocationSelected} yourLocation={yourLocation} primeiraCorrida={primeiraCorrida}/>
+                <Search 
+                    onLocationSelected={handleLocationSelected} 
+                    onLocationMudadoSelected={handleLocationMudadoSelected} 
+                    yourLocation={yourLocation} 
+                    primeiraCorrida={primeiraCorrida}
+                    mudarLocalizacao={mudarLocalizacao}
+                    mudarLocalizacaoAtual={mudarLocalizacaoAtual}
+                    carregarLocalizazao={carregarLocalizazao}
+                />
             </>
             }
             {telaConfirmacao && (

@@ -148,6 +148,7 @@ export const AuthProvider = ({children}) => {
     const [uploading, setUploading] = useState(false)
     const [primeiraCorrida, setPrimeiraCorrida] = useState(false)
     const [config, setConfig] = useState(null)
+    const [mudarLocalizacao, setMudarLocalizacao] = useState(null)
 
     const [request, response, promptAsync] = Google.useIdTokenAuthRequest(
         {
@@ -155,14 +156,15 @@ export const AuthProvider = ({children}) => {
         },
     );
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            carregarLocalizazao()
-        }, 60 * 1000);
-        return () => clearInterval(interval);
-    }, []);
+    // useEffect(() => {
+    //     const interval = setInterval(() => {
+    //         carregarLocalizazao()
+    //     }, 60 * 1000);
+    //     return () => clearInterval(interval);
+    // }, []);
 
     useEffect(() => {
+        // carregarLocalizazao()
         if (response?.type === 'success') {
           const { id_token } = response.params;
           console.log('aaaa', id_token)
@@ -228,6 +230,25 @@ export const AuthProvider = ({children}) => {
         // return () => verific().abort();
     }, [])
 
+    function atualizaLocalizacaoAtual(props){
+        console.log(`Proppp`, props.coordinate)
+        setLocation(props)
+        setYourLocation(props.name)
+        setMudarLocalizacao(!mudarLocalizacao)
+    }
+
+    function mudarLocalizacaoAtual(props){
+        console.log(`mudarLocalizacao`, mudarLocalizacao)
+        if(!mudarLocalizacao){
+            console.log(`2`, )
+            setMudarLocalizacao(!mudarLocalizacao)
+            setYourLocation(false)
+        }else{
+            console.log(`1`, )
+            carregarLocalizazao()
+        }
+    }
+
     async function verific(){
         const token = await AsyncStorage.getItem('@RNAuth:token')
         if(token){
@@ -242,51 +263,65 @@ export const AuthProvider = ({children}) => {
     }
 
     async function carregarLocalizazao(){
+        // setLoading(true)
+        console.log('location =======================================', 1)
         let { status } = await Location.requestForegroundPermissionsAsync();
+        console.log('location =======================================', 2, status)
           if (status !== 'granted') {
             setErrorMsg('Permission to access location was denied');
             return;
           }
-    
-          let locationGeo = await Location.getCurrentPositionAsync({
-            //accuracy: Location.Accuracy.BestForNavigation,
-            //distanceInterval: 5
-          });
-          console.log('location =======================================', locationGeo)
-        //   console.log('location', locationGeo.coords)
-          setLocation(location);
-          setRegion({
-            latitude: locationGeo.coords.latitude,
-            longitude: locationGeo.coords.longitude,
-            latitudeDelta: 0.0143,
-            longitudeDelta: 0.0134,
-          })
+          console.log('location =======================================', 3)
 
-          // buscar localidade atual
-          const response = await Geocoder.from({
-            latitude : locationGeo.coords.latitude,
-            longitude : locationGeo.coords.longitude
-          });
-          const address = response.results[0].formatted_address;
-          const addressComponents = response.results[0].address_components;
-        //   console.log('address', address)
-        //   console.log('response.results[0]', response.results[0])
-        //    console.log('addressComponents', addressComponents)
-        //   setYourLocation(addressComponents[1].short_name)
-          setYourLocation(address)
-          var cidadeEstado = []
-          //buscar informação de CIDADE e ESTADO
-        //   console.log('addressComponents', addressComponents)
-          let resCidadade = addressComponents.filter(addres => addres.types[0] === 'administrative_area_level_2')
-          let resEstado = addressComponents.filter(addres => addres.types[0] === 'administrative_area_level_1')
+          try {
+              
+                let locationGeo = await Location.getCurrentPositionAsync({
+                    //accuracy: Location.Accuracy.BestForNavigation,
+                    //distanceInterval: 5
+                });
+                console.log('location =======================================', locationGeo)
+                setLoading(false)
+                console.log('location', locationGeo.coords)
+                setLocation(location);
+                setRegion({
+                    latitude: locationGeo.coords.latitude,
+                    longitude: locationGeo.coords.longitude,
+                    latitudeDelta: 0.0143,
+                    longitudeDelta: 0.0134,
+                })
+            
+                // buscar localidade atual
+                const response = await Geocoder.from({
+                  latitude : locationGeo.coords.latitude,
+                  longitude : locationGeo.coords.longitude
+                });
+                const address = response.results[0].formatted_address;
+                const addressComponents = response.results[0].address_components;
+              //   console.log('address', address)
+              //   console.log('response.results[0]', response.results[0])
+              //    console.log('addressComponents', addressComponents)
+              //   setYourLocation(addressComponents[1].short_name)
+                setYourLocation(address)
+                setMudarLocalizacao(false)
+                var cidadeEstado = []
+                //buscar informação de CIDADE e ESTADO
+              //   console.log('addressComponents', addressComponents)
+                let resCidadade = addressComponents.filter(addres => addres.types[0] === 'administrative_area_level_2')
+                let resEstado = addressComponents.filter(addres => addres.types[0] === 'administrative_area_level_1')
+                
+                setCidadeEstado({
+                  'cidade' : resCidadade[0].long_name,
+                  'estado' : resEstado[0].long_name
+                })
+      
+                console.log('if', cidadeEstado)
+                setLocation(address.substring(0, address.indexOf(",")))
+          } catch (error) {
+            console.log(`Error locationGeo`, error)
+            setLoading(false)
+          }
+
           
-          setCidadeEstado({
-            'cidade' : resCidadade[0].long_name,
-            'estado' : resEstado[0].long_name
-          })
-
-          console.log('if', cidadeEstado)
-          setLocation(address.substring(0, address.indexOf(",")))
     }
 
 
@@ -1529,7 +1564,11 @@ export const AuthProvider = ({children}) => {
             uploadImage2,
             imagePerfil,
             primeiraCorrida,
-            editarUltimaMensagem
+            editarUltimaMensagem,
+            mudarLocalizacaoAtual,
+            mudarLocalizacao,
+            carregarLocalizazao,
+            atualizaLocalizacaoAtual
         }}>
             {children}
         </AuthContext.Provider>

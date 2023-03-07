@@ -36,6 +36,7 @@ const Routes = () => {
         novaMsg,
         completarPerfil
     } = useAuth()
+    console.log("loading page Routes", signed, loading, novaOrder, aceite, orderStatus)
     // console.log("loading page Routes", signed, loading, novaOrder, aceite, orderStatus)
     // console.log("loading page Routes", signed, loading, novaOrder)
     // alert('signed ' + signed.toString() + ' loading ' + loading.toString())

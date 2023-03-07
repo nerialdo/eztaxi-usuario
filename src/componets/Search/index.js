@@ -1,13 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-import { StyleSheet, View, Text, Dimensions, Platform} from 'react-native';
+import { StyleSheet, View, Text, Dimensions, Platform, TouchableOpacity} from 'react-native';
 import {
   IconButton,
-  Icon
+  Icon,
+  Button,
+  Popover
 } from "native-base";
 import {AntDesign, EvilIcons, FontAwesome5, MaterialIcons, Ionicons} from "@expo/vector-icons"
 
-const Search = ({ onLocationSelected, yourLocation, primeiraCorrida }) => {
+const Search = ({ 
+  onLocationSelected, 
+  onLocationMudadoSelected,
+  yourLocation, 
+  primeiraCorrida, 
+  mudarLocalizacao,
+  mudarLocalizacaoAtual,
+  carregarLocalizazao
+}) => {
 
     const [searchFocused, setSearchFocused] = useState(false)
 
@@ -38,11 +48,18 @@ const Search = ({ onLocationSelected, yourLocation, primeiraCorrida }) => {
     return (
       <View style={styles.container}>
         <View style={styles.location}>
-          <Icon as={Ionicons} size={21} name="location" />
-          <Text numberOfLines={1}>{yourLocation}</Text>
+          <View style={{width: '75%', display: 'flex', justifyContent: "flex-start", flexDirection: "row", backgroundColor: 'white', padding: 3, marginRight: 5}}>
+            <Icon as={Ionicons} size={21} name="location" />
+            <Text numberOfLines={1}>{yourLocation ? yourLocation : 'Aguardando a nova localização'}</Text>
+          </View>
+          <View style={{width: '25%',display: 'flex', justifyContent: 'flex-start', alignItems: 'center', flexDirection: 'row'}}>
+            <TouchableOpacity onPress={mudarLocalizacaoAtual} style={{backgroundColor: mudarLocalizacao ? 'black' : 'purple', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 5, borderRadius: 5}}>
+              <Text style={{color: 'white'}}>{mudarLocalizacao ? 'Voltar' : 'Mudar'}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         <GooglePlacesAutocomplete
-          placeholder="Digie o endereço ou clique no destino"
+          placeholder={mudarLocalizacao ? 'Digite o endereço da outra pessoa' : 'Digie o endereço ou clique no destino'}
           placeholderTextColor="#333"
           minLength={2} // minimum length of text to search
           autoFocus={false}
@@ -50,7 +67,7 @@ const Search = ({ onLocationSelected, yourLocation, primeiraCorrida }) => {
           renderDescription={row => row.description} // custom description renderZ
           nearbyPlacesAPI="GooglePlacesSearch"
           debounce={200}
-          onPress={onLocationSelected}
+          onPress={mudarLocalizacao? onLocationMudadoSelected : onLocationSelected }
           currentLocationLabel={'Sua localização'}
           //currentLocation={true}
           enableHighAccuracyLocation={true}
@@ -164,6 +181,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     flexDirection: 'row',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    width: '100%'
   }
 })

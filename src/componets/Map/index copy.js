@@ -23,7 +23,7 @@ Geocoder.init("AIzaSyA5E67B45xsd69Z2SKIhWuVbVlb736lWvk");
 
 const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
 
-    const {region, location, yourLocation, salvarOrder, user } = useAuth()
+    const {region, location, yourLocation, salvarOrder, user, carregarLocalizazao } = useAuth()
     // const isFocused = useIsFocused();
     // const [region, setRegion] = useState(null)
     // const [location, setLocation] = useState(null);
@@ -40,6 +40,7 @@ const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
     const map = useRef();
 
     
+    
     // useFocusEffect(
     //     React.useCallback(() => {
     //         alert('aasa')
@@ -48,7 +49,11 @@ const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
     // );
 
     useEffect(() => {
+        carregarLocalizazao()
+    }, []);
+    useEffect(() => {
         console.log('regionregionregion', region)
+
         const unsubscribe = navigation.addListener('focus', () => {
             setTelaConfirmacao(false)
         });
