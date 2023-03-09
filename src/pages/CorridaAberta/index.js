@@ -176,7 +176,7 @@ const CorridaAberta = ({ navigation }) => {
           <VStack width={'100%'} padding={2} borderRadius={10} space={4} alignItems="center" >
             <VStack space={4} alignItems="center">
               <Text mt="1" textAlign={'center'} fontWeight="bold" fontSize={16}>
-                Desculpe, o motorista recusou.
+                O motorista recusou a sua ultima corrida
               </Text>
             </VStack>
             <LottieView

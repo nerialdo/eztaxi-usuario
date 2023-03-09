@@ -24,7 +24,11 @@ import * as Location from 'expo-location';
 import styled, { css } from 'styled-components/native';
 import LottieView from 'lottie-react-native';
 
-const Esperando = ({ navigation, handleBack, desabilitarTelaEspera }) => {
+const Esperando = ({ 
+  navigation, 
+  // handleBack, 
+  desabilitarTelaEspera 
+}) => {
   const {user, idTransacao, removerOrder, aceite, cancelarCorrida, novaOrder} = useAuth()
   const [menuTop, setMenuTop] = useState(true)
   const [showMenu, seShowMenu] = useState(false)
@@ -60,14 +64,14 @@ const Esperando = ({ navigation, handleBack, desabilitarTelaEspera }) => {
     
   }, [])
 
-  const handleMenuTop = () => {
-    setMenuTop(!menuTop)
-  }
+  // const handleMenuTop = () => {
+  //   //setMenuTop(!menuTop)
+  // }
   
 
-  const handleShowMenu = () => {
-    seShowMenu(!showMenu)
-  }
+  // const handleShowMenu = () => {
+  //   //seShowMenu(!showMenu)
+  // }
   
 
   return (

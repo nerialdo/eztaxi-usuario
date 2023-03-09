@@ -116,6 +116,7 @@ export const AuthProvider = ({children}) => {
 
 
     const [region, setRegion] = useState(null)
+    const [destination, setDestination] = useState(null);
     const [location, setLocation] = useState(null);
     const [yourLocation, setYourLocation] = useState(null);
     const [cidadeEstado, setCidadeEstado] = useState(null);
@@ -155,6 +156,12 @@ export const AuthProvider = ({children}) => {
           clientId: '741352224001-9b8pjmsf756mtitpjdfes7092310ar0j.apps.googleusercontent.com',
         },
     );
+
+
+    const [ selected, setSelected ] = useState(null)
+    const [ valor, setValor ] = useState(null)
+    const [ valorSemBonus, setValorSemBonus ] = useState(null)
+    const [ valorBonus, setValorBonus ] = useState(20)
 
     // useEffect(() => {
     //     const interval = setInterval(() => {
@@ -230,6 +237,79 @@ export const AuthProvider = ({children}) => {
         // return () => verific().abort();
     }, [])
 
+    const handleBack = () => {
+        setDestination(null)
+        // handleMenuTop()
+        // setTelaConfirmacao(!telaConfirmacao)
+    }
+
+    const refazerPedido = (e) => {
+
+    }
+
+    const handleLocationPoiClick = (e) => {
+        const {coordinate: { latitude: latitude, longitude: longitude }, name} = e.nativeEvent;
+        console.log('handleLocationPoiClick', latitude, longitude, name, mudarLocalizacao)
+        if(mudarLocalizacao){ // se mudar localizacao for verdadeiro
+            // atualizaLocalizacaoAtual(e.nativeEvent)
+            console.log('======>', latitude, longitude, name)
+            // setLocation(props)
+            setYourLocation(name)
+            setMudarLocalizacao(!mudarLocalizacao)
+            setRegion({
+                latitude: latitude,
+                longitude: longitude,
+                latitudeDelta: 0.0143,
+                longitudeDelta: 0.0134,
+            })
+
+        }else{ // se mudar localizacao for falso
+            // handleMenuTop()
+            // handleBack()
+            
+            setDestination({
+                latitude,
+                longitude,
+                title: name,
+                title_secondary: name,
+            })
+        }
+    }
+
+    const handleLocationMudadoSelected = (data, { geometry }) => {
+        // alert(`aqui`)
+        console.log('onLocationMudadoSelected', data, geometry)
+        const {location: { lat: latitude, lng: longitude }} = geometry;
+        setYourLocation(data.structured_formatting.main_text)
+        setMudarLocalizacao(!mudarLocalizacao)
+        setRegion({
+            latitude: latitude,
+            longitude: longitude,
+            latitudeDelta: 0.0143,
+            longitudeDelta: 0.0134,
+        })
+        // handleMenuTop()
+        // atualizaLocalizacaoAtual({location:{ lat: latitude, lng: longitude }, name: data.structured_formatting.main_text})
+        // setDestination({
+        //     latitude,
+        //     longitude,
+        //     title: data.structured_formatting.main_text,
+        //     title_secondary: data.structured_formatting.secondary_text,
+        // })
+    }
+
+    const handleLocationSelected = (data, { geometry }) => {
+        //console.log('handleLocationSelected', data, geometry)
+        const {location: { lat: latitude, lng: longitude }} = geometry;
+        // handleMenuTop()
+        setDestination({
+            latitude,
+            longitude,
+            title: data.structured_formatting.main_text,
+            title_secondary: data.structured_formatting.secondary_text,
+        })
+    }
+
     function atualizaLocalizacaoAtual(props){
         console.log(`Proppp`, props.coordinate)
         setLocation(props)
@@ -282,7 +362,7 @@ export const AuthProvider = ({children}) => {
                 console.log('location =======================================', locationGeo)
                 setLoading(false)
                 console.log('location', locationGeo.coords)
-                setLocation(location);
+                // setLocation(location);
                 setRegion({
                     latitude: locationGeo.coords.latitude,
                     longitude: locationGeo.coords.longitude,
@@ -941,7 +1021,7 @@ export const AuthProvider = ({children}) => {
         // console.log('buscarMotoristaLivre')
         try {
             setMotoristaLivre([])
-            const museums = query(collection(db, 'motoristas'), where("status", "==", 'Livre'));
+            const museums = query(collection(db, 'motoristas'), where("status", "==", 'Teste'));
             // const querySnapshot = await getDocs(museums);
             onSnapshot(museums, querySnapshot => {
                 var dadosMotoristas = []
@@ -1568,7 +1648,20 @@ export const AuthProvider = ({children}) => {
             mudarLocalizacaoAtual,
             mudarLocalizacao,
             carregarLocalizazao,
-            atualizaLocalizacaoAtual
+            atualizaLocalizacaoAtual,
+            handleLocationSelected,
+            handleLocationMudadoSelected,
+            destination,
+            handleLocationPoiClick,
+            handleBack,
+            setSelected,
+            setValor,
+            setValorSemBonus,
+            setValorBonus,
+            selected,
+            valor,
+            valorSemBonus,
+            valorBonus,
         }}>
             {children}
         </AuthContext.Provider>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { StyleSheet, View, Text, Dimensions, Platform, TouchableOpacity} from 'react-native';
 import {
@@ -16,8 +16,11 @@ const Search = ({
   primeiraCorrida, 
   mudarLocalizacao,
   mudarLocalizacaoAtual,
-  carregarLocalizazao
+  carregarLocalizazao,
+  destination
 }) => {
+
+    const input = useRef()
 
     const [searchFocused, setSearchFocused] = useState(false)
 
@@ -53,12 +56,14 @@ const Search = ({
             <Text numberOfLines={1}>{yourLocation ? yourLocation : 'Aguardando a nova localização'}</Text>
           </View>
           <View style={{width: '25%',display: 'flex', justifyContent: 'flex-start', alignItems: 'center', flexDirection: 'row'}}>
-            <TouchableOpacity onPress={mudarLocalizacaoAtual} style={{backgroundColor: mudarLocalizacao ? 'black' : 'purple', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 5, borderRadius: 5}}>
+            <TouchableOpacity disabled={destination} onPress={mudarLocalizacaoAtual} style={{backgroundColor: mudarLocalizacao ? 'black' : 'purple', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 5, borderRadius: 5}}>
               <Text style={{color: 'white'}}>{mudarLocalizacao ? 'Voltar' : 'Mudar'}</Text>
             </TouchableOpacity>
           </View>
         </View>
+        
         <GooglePlacesAutocomplete
+          ref={input}
           placeholder={mudarLocalizacao ? 'Digite o endereço da outra pessoa' : 'Digie o endereço ou clique no destino'}
           placeholderTextColor="#333"
           minLength={2} // minimum length of text to search
@@ -89,9 +94,11 @@ const Search = ({
           textInputProps={{
             onFocus: () => {
               setSearchFocused(true);
+              input.clear
             },
             onBlur: () => {
               setSearchFocused(false)
+              // alert(2)
             },
             getCurrentLocation: () => {
               console.log('******')

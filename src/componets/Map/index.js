@@ -22,7 +22,11 @@ import motoPng from '../../../assets/moto.png';
 
 // Geocoder.init("AIzaSyA5E67B45xsd69Z2SKIhWuVbVlb736lWvk"); 
 
-const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
+const Map = ({ 
+    navigation, 
+    // handleMenuTop, 
+    // handleMenuTop2 
+}) => {
 
     const {
         region, location, yourLocation, salvarOrder, 
@@ -32,14 +36,19 @@ const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
         mudarLocalizacaoAtual,
         mudarLocalizacao,
         carregarLocalizazao,
-        atualizaLocalizacaoAtual
+        atualizaLocalizacaoAtual,
+        handleLocationSelected,
+        handleLocationMudadoSelected,
+        destination,
+        handleLocationPoiClick,
+        handleBack
     } = useAuth()
     
     // const isFocused = useIsFocused();
     // const [region, setRegion] = useState(null)
     // const [location, setLocation] = useState(null);
     const [errorMsg, setErrorMsg] = useState(null);
-    const [destination, setDestination] = useState(null);
+    // const [destination, setDestination] = useState(null);
     const [duration, setDuration] = useState(null);
     const [distancia, setDistancia] = useState(null);
     const [mapView, setMapView] = useState(null);
@@ -129,9 +138,9 @@ const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
         // console.log('dadossoo', dadosCorrida, valor, distancia, destination, duration, yourLocation, region)
         salvarPedido(dadosCorrida, valor, distancia, destination, duration, yourLocation, region, corridaBonus, valorSemBonus)
         // setShowModal(!showModal)
-        handleBack()
+        // handleBack()
         // handleMenuTop()
-        handleMenuTop2()
+        // handleMenuTop2()
         setTelaConfirmacao(true)
         // navigation.push('Confirmacao');
     }
@@ -146,62 +155,62 @@ const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
         console.log('Region  no map', region)
     }
 
-    const handleLocationSelected = (data, { geometry }) => {
-        //console.log('handleLocationSelected', data, geometry)
-        const {location: { lat: latitude, lng: longitude }} = geometry;
-        handleMenuTop()
-        setDestination({
-            latitude,
-            longitude,
-            title: data.structured_formatting.main_text,
-            title_secondary: data.structured_formatting.secondary_text,
-        })
-    }
+    // const handleLocationSelected = (data, { geometry }) => {
+    //     //console.log('handleLocationSelected', data, geometry)
+    //     const {location: { lat: latitude, lng: longitude }} = geometry;
+    //     handleMenuTop()
+    //     setDestination({
+    //         latitude,
+    //         longitude,
+    //         title: data.structured_formatting.main_text,
+    //         title_secondary: data.structured_formatting.secondary_text,
+    //     })
+    // }
    
-    const handleLocationMudadoSelected = (data, { geometry }) => {
-        // alert(`aqui`)
-        console.log('onLocationMudadoSelected', data, geometry)
-        const {location: { lat: latitude, lng: longitude }} = geometry;
-        // handleMenuTop()
-        atualizaLocalizacaoAtual({location:{ lat: latitude, lng: longitude }, name: data.structured_formatting.main_text})
-        // setDestination({
-        //     latitude,
-        //     longitude,
-        //     title: data.structured_formatting.main_text,
-        //     title_secondary: data.structured_formatting.secondary_text,
-        // })
-    }
+    // const handleLocationMudadoSelected = (data, { geometry }) => {
+    //     // alert(`aqui`)
+    //     console.log('onLocationMudadoSelected', data, geometry)
+    //     const {location: { lat: latitude, lng: longitude }} = geometry;
+    //     // handleMenuTop()
+    //     atualizaLocalizacaoAtual({location:{ lat: latitude, lng: longitude }, name: data.structured_formatting.main_text})
+    //     // setDestination({
+    //     //     latitude,
+    //     //     longitude,
+    //     //     title: data.structured_formatting.main_text,
+    //     //     title_secondary: data.structured_formatting.secondary_text,
+    //     // })
+    // }
 
-    const handleLocationPoiClick = (e) => {
-        const {coordinate: { latitude: latitude, longitude: longitude }, name} = e.nativeEvent;
-        console.log('handleLocationPoiClick', latitude, longitude, name, mudarLocalizacao)
-        if(mudarLocalizacao){
-            atualizaLocalizacaoAtual(e.nativeEvent)
-            console.log('======>', latitude, longitude, name)
-            // setDestination({
-            //     latitude,
-            //     longitude,
-            //     title: name,
-            //     title_secondary: name,
-            // })
-        }else{
-            handleMenuTop()
-            handleBack()
+    // const handleLocationPoiClick = (e) => {
+    //     const {coordinate: { latitude: latitude, longitude: longitude }, name} = e.nativeEvent;
+    //     console.log('handleLocationPoiClick', latitude, longitude, name, mudarLocalizacao)
+    //     if(mudarLocalizacao){
+    //         atualizaLocalizacaoAtual(e.nativeEvent)
+    //         console.log('======>', latitude, longitude, name)
+    //         // setDestination({
+    //         //     latitude,
+    //         //     longitude,
+    //         //     title: name,
+    //         //     title_secondary: name,
+    //         // })
+    //     }else{
+    //         // handleMenuTop()
+    //         handleBack()
             
-            setDestination({
-                latitude,
-                longitude,
-                title: name,
-                title_secondary: name,
-            })
-        }
-    }
+    //         // setDestination({
+    //         //     latitude,
+    //         //     longitude,
+    //         //     title: name,
+    //         //     title_secondary: name,
+    //         // })
+    //     }
+    // }
 
-    const handleBack = () => {
-        setDestination(null)
-        handleMenuTop()
-        // setTelaConfirmacao(!telaConfirmacao)
-    }
+    // const handleBack = () => {
+    //     // setDestination(null)
+    //     // handleMenuTop()
+    //     // setTelaConfirmacao(!telaConfirmacao)
+    // }
 
     const converterMinuto = (min) => {
         if(min === 0){
@@ -225,7 +234,6 @@ const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
 
     return (
         <View style={styles.container}>
-            <Text>testeoosososoo{destination?.latitude}</Text>
             {region && (
                 <MapView
                     style={styles.map}
@@ -359,8 +367,8 @@ const Map = ({ navigation, handleMenuTop, handleMenuTop2 }) => {
                 <View>
                     <Esperando 
                         navigation={navigation}
-                        handleMenuTop={handleMenuTop} 
-                        handleBack={handleBack}
+                        // handleMenuTop={handleMenuTop} 
+                        // handleBack={handleBack}
                         desabilitarTelaEspera={desabilitarTelaEspera}
                     />
                 </View>

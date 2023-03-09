@@ -43,17 +43,17 @@ const Dashboard = ({ navigation, route }) => {
 
   // }, [])
 
-  const handleMenuTop = () => {
-    setMenuTop(!menuTop)
-  }
+  // const handleMenuTop = () => {
+  //   // setMenuTop(!menuTop)
+  // }
   
-  const handleMenuTop2 = () => {
-    setMenuTop(!menuTop)
-  }
+  // const handleMenuTop2 = () => {
+  //   // setMenuTop(!menuTop)
+  // }
 
-  const handleShowMenu = () => {
-    seShowMenu(!showMenu)
-  }
+  // const handleShowMenu = () => {
+  //   // seShowMenu(!showMenu)
+  // }
   
 
   return (
@@ -103,7 +103,11 @@ const Dashboard = ({ navigation, route }) => {
       {/* <View style={{flex: 1, display: 'flex', backgroundColor: 'blue'}}>
         <Text>aqui</Text>
       </View> */}
-      <Map handleMenuTop={handleMenuTop} handleMenuTop2={handleMenuTop2} navigation={navigation}/>
+      <Map 
+        // handleMenuTop={handleMenuTop} 
+        // handleMenuTop2={handleMenuTop2} 
+        navigation={navigation}
+      />
       {/* {showMenu && (
         <MyMenu navigation={navigation} rotasTelas={rotasTelas} />
       )} */}

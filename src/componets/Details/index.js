@@ -9,12 +9,26 @@ import enZA from 'date-fns/esm/locale/en-ZA/index.js';
 
 const Details = ({distancia, navigation, destination, duration, abrirConfirmacao, yourLocation}) => {
 
-  const { buscarMotoristaLivre, motoristaLivre, region, semMotorista, primeiraCorrida} = useAuth()
+  const { 
+    buscarMotoristaLivre, 
+    motoristaLivre, 
+    region, 
+    semMotorista, 
+    primeiraCorrida,
+    selected,
+    valor,
+    valorSemBonus,
+    valorBonus,
+    setSelected,
+    setValor,
+    setValorSemBonus,
+    setValorBonus,
+  } = useAuth()
 
-  const [ selected, setSelected ] = useState(null)
-  const [ valor, setValor ] = useState(null)
-  const [ valorSemBonus, setValorSemBonus ] = useState(null)
-  const [ valorBonus, setValorBonus ] = useState(20)
+  // const [ selected, setSelected ] = useState(null)
+  // const [ valor, setValor ] = useState(null)
+  // const [ valorSemBonus, setValorSemBonus ] = useState(null)
+  // const [ valorBonus, setValorBonus ] = useState(20)
 
   useEffect(() => {
     buscarMotoristaLivre()
@@ -34,14 +48,14 @@ const Details = ({distancia, navigation, destination, duration, abrirConfirmacao
     var km = arr[0];
     var m = arr[1]
     
-    console.log('tarifa', tarifa, kmString, arr)
+    // console.log('tarifa', tarifa, kmString, arr)
 
     var kmInteger = parseInt(km)
     var mInteger = parseInt(m)
 
     // calcular KM
     var totalValorKm = kmInteger * tarifa.km
-    console.log('totalValorKm ', totalValorKm)
+    // console.log('totalValorKm ', totalValorKm)
     // calcular Metros
     var valorMetro = tarifa.km / 1000
     var totalValorM = mInteger * valorMetro
@@ -60,7 +74,7 @@ const Details = ({distancia, navigation, destination, duration, abrirConfirmacao
     // console.log('Item definir veiculo', item)
     for (let i = 0; i < item.length; i++) {
       const element = item[i];
-      console.log('Veiculo ', element)
+      // console.log('Veiculo ', element)
       if(element.status){
         return {
           ano: element.ano,
