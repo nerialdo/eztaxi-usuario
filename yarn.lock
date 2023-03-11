@@ -3116,6 +3116,11 @@
   dependencies:
     "@react-types/shared" "^3.16.0"
 
+"@robxyy/react-native-countdown@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@robxyy/react-native-countdown/-/react-native-countdown-0.3.0.tgz#860f430c30aa4ca99e7cfd6bbd690d64d0dde4fb"
+  integrity sha512-FJhe5fsDtTEPoiCQaAu4/eRI5jByg1SdvcTEX0VzYRwDFlmzFR+/ttNjekqmwTuDFMNVCCrgkzT+D9HN4ygPZQ==
+
 "@segment/loosely-validate-event@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@segment/loosely-validate-event/-/loosely-validate-event-2.0.0.tgz#87dfc979e5b4e7b82c5f1d8b722dfd5d77644681"
@@ -7343,7 +7348,7 @@ prop-types@15.7.2:
     object-assign "^4.1.1"
     react-is "^16.8.1"
 
-prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.2, prop-types@^15.7.2, prop-types@^15.7.x:
+prop-types@^15.6.0, prop-types@^15.6.2, prop-types@^15.7.2, prop-types@^15.7.x:
   version "15.8.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.8.1.tgz#67d87bf1a694f48435cf332c24af10214a3140b5"
   integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==
@@ -7521,14 +7526,10 @@ react-native-communications@2.2.1:
   resolved "https://registry.yarnpkg.com/react-native-communications/-/react-native-communications-2.2.1.tgz#7883b56b20a002eeb790c113f8616ea8692ca795"
   integrity sha512-5+C0X9mopI0+qxyQHzOPEi5v5rxNBQjxydPPiKMQSlX1RBIcJ8uTcqUPssQ9Mo8p6c1IKIWJUSqCj4jAmD0qVQ==
 
-react-native-countdown-component@^2.7.1:
-  version "2.7.1"
-  resolved "https://registry.yarnpkg.com/react-native-countdown-component/-/react-native-countdown-component-2.7.1.tgz#d1e1278d792b0bb6b1bf58972e8a3ad758926a86"
-  integrity sha512-H7D/YvMjY1hCJf9xFrNh5CsIwkcel/Suno2gYR6ulWwoa2xnUgmltFWoMyEIODsUy7lIK1KCPm+Zn26QajbRaw==
-  dependencies:
-    lodash "^4.17.13"
-    prop-types "^15.5.8"
-    sprintf-js "^1.1.1"
+react-native-countdown-circle-timer@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-countdown-circle-timer/-/react-native-countdown-circle-timer-3.1.0.tgz#f8b06cb30cc1b5b587ef7ef5b6ec4923dc9fb4dd"
+  integrity sha512-Hx5mJQBcamRGonmRyMhMCGy17ft6eKoWopywadaCLC0qmjHuiokoEalhwBliVeJtPK21A03WAMkprpIoL1ovNA==
 
 react-native-geocoding@^0.5.0:
   version "0.5.0"
@@ -8287,11 +8288,6 @@ split@^1.0.1:
   integrity sha512-mTyOoPbrivtXnwnIxZRFYRrPNtEFKlpB2fvjSnCQUiAA6qAZzqwna5envK4uk6OIeP17CsdF3rSBGYVBsU0Tkg==
   dependencies:
     through "2"
-
-sprintf-js@^1.1.1:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.1.2.tgz#da1765262bf8c0f571749f2ad6c26300207ae673"
-  integrity sha512-VE0SOVEHCk7Qc8ulkWw3ntAzXuqf7S2lvwQaDLRnUeIEaKNQJzV6BwmLKhOqT61aGhfUMrXeaBk+oDGCzvhcug==
 
 sprintf-js@~1.0.2:
   version "1.0.3"

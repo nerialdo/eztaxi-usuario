@@ -162,6 +162,7 @@ export const AuthProvider = ({children}) => {
     const [ valor, setValor ] = useState(null)
     const [ valorSemBonus, setValorSemBonus ] = useState(null)
     const [ valorBonus, setValorBonus ] = useState(20)
+    const [showCountdown, setShowCountdown] = useState(true);
 
     // useEffect(() => {
     //     const interval = setInterval(() => {
@@ -236,6 +237,88 @@ export const AuthProvider = ({children}) => {
 
         // return () => verific().abort();
     }, [])
+
+    const chamandoNovoMotorista = async (orderatual, useratual) => {
+        setShowCountdown(false)
+        console.log(`orderatual`, orderatual)
+        var idmotoristaatual = orderatual.data.idMotorista
+        var dadocorridaatual = orderatual.data
+
+        //cancelar a atual
+        await cancelarCorrida(orderatual, 'Demora em aceitar', 'EzTaxi')
+
+        try {
+            // setMotoristaLivre([])
+            const museums = query(collection(db, 'motoristas'), 
+            where("status", "==", 'Teste'), 
+            where("id", "!=", idmotoristaatual),limit(1),
+            where("tipoVeiculo", "==", dadocorridaatual.dadosCorrida.tipoVeiculo),limit(1),
+            );
+            // const querySnapshot = await getDocs(museums);
+            onSnapshot(museums, querySnapshot => {
+                // console.log('querySnapshot', querySnapshot.size)
+                if(querySnapshot.size === 0){
+                    setSemMotorista(false)
+                }else {
+                    querySnapshot.forEach((doc) => {
+                        console.log(doc.id, ' => ********** buscarMotoristaLivre', doc.data());
+                        // selected, 
+                        // valor, 
+                        // distancia,
+                        // destination,
+                        // duration,
+                        // yourLocation,
+                        // region,
+                        // primeiraCorrida,
+                        // valorSemBonus
+
+                //         idMotorista: dadosCorrida.id,
+                // idCliente: user.id,
+                // dadosCorrida: dadosCorrida,
+                // yourLocation: yourLocation,
+                // yourGeoLocation: regionGeo,
+                // valor: valor,
+                // distancia: distancia,
+                // destination: destination,
+                // duration: duration,
+                // user: user,
+                // aceite: null,
+                // buscouPassageiro: false,
+                // buscandoPassageiro: null, // nullo sem interação, true buscando passageiro, false: saiu da rota de buscar passageiro
+                // status: 'PENDENTE',
+                // data: Timestamp.fromDate(new Date()),
+                // corridaBonus,
+                // valorSemBonus
+                        salvarOrder(
+                            doc.data(), 
+                            dadocorridaatual.valor,
+                            dadocorridaatual.distancia, 
+                            dadocorridaatual.destination, 
+                            dadocorridaatual.duration, 
+                            useratual, 
+                            dadocorridaatual.yourLocation, 
+                            dadocorridaatual.yourGeoLocation, //region, 
+                            dadocorridaatual.corridaBonus, 
+                            dadocorridaatual.valorSemBonus
+                        )
+
+                        // dadosMotoristas.push(doc.data())
+                    });
+                    setShowCountdown(true)
+                    // setMotoristaLivre(dadosMotoristas)
+                    // for (let m = 0; m < dadosMotoristas.length; m++) {
+                    //     const element = dadosMotoristas[m];
+                    //     console.log('dadosMotoristas **** for', element)
+                    //     // console.log('dadosMotoristas **** for 2', element.veiculos.length)
+                        
+                    // }
+                }
+            });
+    
+        } catch (error) {
+            console.log('Erro ao buscar motoristas livres ', error)
+        }
+    }
 
     const handleBack = () => {
         setDestination(null)
@@ -491,7 +574,7 @@ export const AuthProvider = ({children}) => {
     // buscar hitorico de conversas no chat
     async function historicoCorridas(id){
         // console.log('idcliente ', id)
-        alert('Id do cliente: '+ id)
+        // alert('Id do cliente: '+ id)
         setLoadi(true)
         try {
             const q = query(collection(db, "order"), where('idCliente', '==', id), orderBy("data", "desc"));
@@ -738,7 +821,7 @@ export const AuthProvider = ({children}) => {
     }
 
     // cancela a corrida e define um motivo do cancelamento
-    async function cancelarCorrida(dados, motivo){
+    async function cancelarCorrida(dados, motivo, quemcancelou){
 
         setLoading(true)
         // console.log('PPPPPP ', dados)
@@ -752,7 +835,7 @@ export const AuthProvider = ({children}) => {
                     'status': 'CANCELADO',
                     'dataCancelamento': Timestamp.fromDate(new Date()),
                     'motivoCancelamento': motivo,
-                    'quemCancelou': 'Cliente'  
+                    'quemCancelou': quemcancelou 
                 });
                 // atualizarStatusMotorista(dados.data.idMotorista, 'Livre')
                 setOrderStatus({'status': 'CANCELADO', 'quemCancelou': 'Cliente', 'dados': dados[0]})
@@ -950,8 +1033,18 @@ export const AuthProvider = ({children}) => {
         valorSemBonus
     ){
 
-        // console.log('Salvando ordem para o motorista', dadosCorrida, valor, distancia, destination, duration, user)
+        console.log('Salvando ordem para o motorista', dadosCorrida, 
+        valor, 
+        distancia, 
+        destination, 
+        duration, 
+        user,
+        yourLocation,
+        regionGeo,
+        corridaBonus,
+        valorSemBonus)
         setAceite('aguardando')
+        
         try {
             const docRef = await addDoc(collection(db, "order"), {
                 idMotorista: dadosCorrida.id,
@@ -1662,6 +1755,8 @@ export const AuthProvider = ({children}) => {
             valor,
             valorSemBonus,
             valorBonus,
+            showCountdown,
+            chamandoNovoMotorista
         }}>
             {children}
         </AuthContext.Provider>

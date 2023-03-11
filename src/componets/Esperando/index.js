@@ -118,7 +118,7 @@ const Esperando = ({
               {idTransacao && (
                 <Button size={'md'} variant="ghost" onPress={() => {
                   // removerOrder(idTransacao)
-                  cancelarCorrida([{'id': idTransacao}], 'Não informado')
+                  cancelarCorrida([{'id': idTransacao}], 'Não informado', 'Cliente')
                   desabilitarTelaEspera()
                 }}>
                   Cancelar

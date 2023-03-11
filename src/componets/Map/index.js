@@ -213,11 +213,13 @@ const Map = ({
     // }
 
     const converterMinuto = (min) => {
+
         if(min === 0){
             return 1 +'min'
         }
         if(min <= 60){
-            return min +'min'
+            // return min +'min'
+            return  parseFloat(min).toFixed(2) + 'min'
         }else{
             return parseFloat(min / 60).toFixed(2) + 'hs'
         }

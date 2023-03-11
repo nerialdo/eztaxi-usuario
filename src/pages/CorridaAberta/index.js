@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import { StyleSheet, Alert, View, TouchableOpacity} from 'react-native';
 import {
   Box,
@@ -21,7 +21,9 @@ import { Chat } from '../../componets/Chat';
 import MapMonitoramento from '../../componets/Map_monitoramento';
 import AlertMsg from '../../componets/AlertMsg';
 import FabMsg from '../../componets/FabMsg';
-// import CountDown from 'react-native-countdown-component';
+import { CountdownCircleTimer } from 'react-native-countdown-circle-timer'
+import CountDown from '@robxyy/react-native-countdown'
+
 
 
 const CorridaAberta = ({ navigation }) => {
@@ -29,20 +31,31 @@ const CorridaAberta = ({ navigation }) => {
   const { 
     loading, novaOrder, user, logout, 
     cancelarCorrida, messages, onSend, iniciarChat, 
-    idTransacao, limparOrder, novaMsg} = useAuth()
+    idTransacao, limparOrder, novaMsg,
+    showCountdown,
+    chamandoNovoMotorista
+  } = useAuth()
   const [ corridaAberta, setCorridaAberta ] = useState([])
   const [ isCaht, setIsChat ] = useState(false)
   const [duration, setDuration] = useState(0);
   const [distancia, setDistancia] = useState(0);
 
- 
+  const [contador, setContador] = useState(null);
+
+  // const [showCountdown, setShowCountdown] = useState(true);
+  const [remainingCount, setRemainingCount] = useState(0);
+  const [minuto, setMinuto] = useState(0);
+  const [segundo, setSegundo] = useState(0);
+
+  const cont = useRef();
 
   useEffect(() => {
-    // console.log('novaOrder pagina CorridaAberta', novaOrder)
+    console.log('novaOrder pagina CorridaAberta', novaOrder)
     setCorridaAberta(novaOrder)
     if(idTransacao){
       iniciarChat(idTransacao)
     }
+    setContador(true)
   }, [novaOrder]);
 
 
@@ -89,6 +102,32 @@ const CorridaAberta = ({ navigation }) => {
   //   ])
   // }
 
+  function convSeg(seg){
+    var dateObj = new Date(seg * 1000);
+    // var minutes = dateObj.getUTCMinutes();
+    // var seconds = dateObj.getSeconds();
+    var minutes = format(dateObj, 'mm');
+    var seconds = format(dateObj, 'ss');
+    console.log('Seg', minutes,  seconds)
+    setMinuto(minutes)
+    setSegundo(seconds)
+  }
+
+  function moedaBR(amount, decimalCount = 2, decimal = ",", thousands = "."){
+    try {
+      decimalCount = Math.abs(decimalCount);
+      decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
+
+      const negativeSign = amount < 0 ? "-" : "";
+
+      let i = parseInt(amount = Math.abs(Number(amount) || 0).toFixed(decimalCount)).toString();
+      let j = (i.length > 3) ? i.length % 3 : 0;
+
+      return negativeSign + (j ? i.substr(0, j) + thousands : '') + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands) + (decimalCount ? decimal + Math.abs(amount - i).toFixed(decimalCount).slice(2) : "");
+    } catch (e) {
+      //(e)
+    }
+  }
 
   return (
       <>
@@ -116,7 +155,8 @@ const CorridaAberta = ({ navigation }) => {
               Esta tela será atualizada automaticamente
             </Heading>
             <Heading fontSize="md" p="5" pb="1" textAlign={'center'} color={'gray.900'} fontWeight='normal'>
-              Não saia desta tela, nós estamos informando o motorista que você está chamando. Esse processo pode, em alguns casos, demorar. Recomendamos que, se o motorista não responder em 3 minutos, encerre e chame outro.
+              Não saia desta tela, nós estamos informando o motorista que você está chamando. 
+              Se o motorista não responder em 2 minutos vemos chamar outro.
             </Heading>
             {/* <CountDown
               style={{
@@ -134,20 +174,112 @@ const CorridaAberta = ({ navigation }) => {
                 source={require('../../../assets/waiting-car.json')} 
                 autoPlay loop 
                 style={{
-                  width: '100%'
+                  width: '50%'
                 }}
               />
+              
+              <View style={{margin: 15}}>
+                {showCountdown && (
+                  <CountDown
+                      millisInFuture={60 * 100}
+                      countDownInterval={1000}
+                      onTick={value => {
+                        console.log(`Value onTick`, value)
+                        setRemainingCount(value);
+                        convSeg(value)
+                      }}
+                      onFinish={() => {
+                        console.log(`Encerrou`)
+                        chamandoNovoMotorista(novaOrder, user)
+                      }}>
+                    <View
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                      }}
+                    >
+                      {/* <Text>{`${remainingCount}s`}</Text> */}
+                      <Text
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'center',
+                          paddingTop: 5,
+                          paddingBottom: 5,
+                          paddingLeft: 5,
+                          paddingRight: 5,
+                          fontSize: 21,
+                          fontWeight: 'bold'
+                        }}
+                      >{ minuto }</Text>
+                      <Text
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        paddingTop: 2,
+                        paddingBottom: 0,
+                        paddingLeft: 0,
+                        paddingRight: 0,
+                        fontSize: 18
+                      }}
+                      >:</Text>
+                      <Text
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        paddingTop: 5,
+                        paddingBottom: 5,
+                        paddingLeft: 5,
+                        paddingRight: 5,
+                        fontSize: 21,
+                        fontWeight: 'bold'
+                      }}
+                      >{segundo}</Text>
+                    </View>
+                  </CountDown>
+                )} 
+              </View>
+              <View style={{margin: 15}}>
+                <Box pl="4" pr="5" py="2" bg={`amber.100`}>
+                  <Text>Chamando...</Text>
+                  <HStack alignItems="center" mt={1} space={3}>
+                    <Avatar size="48px" source={{
+                    uri: novaOrder.data.dadosCorrida.picture
+                  }} />
+                    <VStack>
+                      <Text color="coolGray.800" _dark={{
+                      color: 'warmGray.50'
+                    }} bold>
+                        {novaOrder.data.dadosCorrida.nome}
+                      </Text>
+                      <Text color="coolGray.600" _dark={{
+                      color: 'warmGray.200'
+                    }}>
+                        {novaOrder.data.dadosCorrida.tipoVeiculo} / {novaOrder.data.dadosCorrida.veiculos[0]?.placa}
+                      </Text>
+                    </VStack>
+                    <Spacer />
+                    <Text fontSize="xs" color="coolGray.800" _dark={{
+                    color: 'warmGray.50'
+                  }} alignSelf="flex-start">
+                      R$ {moedaBR(novaOrder.data.valor)}
+                    </Text>
+                  </HStack>
+                </Box>
+              </View>
               <TouchableOpacity
                 onPress={() => {
                   // cancelarCorrida(novaOrder, 'Não informado')
                   Alert.alert('Você quer cancelar esta corrida?', 'Você só pode cancelar até 3 corridas no mês', [
                     {
                       text: 'Sim, quero cancelar!',
-                      onPress: () => cancelarCorrida(novaOrder, 'Não informado'),
+                      onPress: () => {
+                        // cont.remove()
+                        cancelarCorrida(novaOrder, 'Não informado', 'Cliente')
+                      },
                     },
                     {
                       text: 'Não!',
-                      onPress: () => console.log('Cancel Pressed'),
+                      onPress: () => console.log('Cancel Pressed', 'Cliente'),
                       style: 'cancel',
                     },
                   ]);
