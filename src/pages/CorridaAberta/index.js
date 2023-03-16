@@ -33,7 +33,9 @@ const CorridaAberta = ({ navigation }) => {
     cancelarCorrida, messages, onSend, iniciarChat, 
     idTransacao, limparOrder, novaMsg,
     showCountdown,
-    chamandoNovoMotorista
+    chamandoNovoMotorista,
+    statusCorrida,
+    minutodeEspera
   } = useAuth()
   const [ corridaAberta, setCorridaAberta ] = useState([])
   const [ isCaht, setIsChat ] = useState(false)
@@ -50,7 +52,7 @@ const CorridaAberta = ({ navigation }) => {
   const cont = useRef();
 
   useEffect(() => {
-    console.log('novaOrder pagina CorridaAberta', novaOrder)
+    // console.log('novaOrder pagina CorridaAberta', novaOrder)
     setCorridaAberta(novaOrder)
     if(idTransacao){
       iniciarChat(idTransacao)
@@ -134,11 +136,11 @@ const CorridaAberta = ({ navigation }) => {
       {/* {novaMsg && (
           <AlertMsg style={{zIndex: 9999}} />
       )} */}
-      {novaMsg && (
+      {/* {novaMsg && (
           <View style={styles.InfoGeralTop}>
               <AlertMsg fecharAbrirChat={fecharAbrirChat} novaMsg={novaMsg} />
           </View>
-      )}
+      )} */}
       {novaOrder.data.status === 'PENDENTE' && (
         <View style={styles.container}>
            <Heading fontSize="xl" p="4" pb="3">
@@ -156,7 +158,7 @@ const CorridaAberta = ({ navigation }) => {
             </Heading>
             <Heading fontSize="md" p="5" pb="1" textAlign={'center'} color={'gray.900'} fontWeight='normal'>
               Não saia desta tela, nós estamos informando o motorista que você está chamando. 
-              Se o motorista não responder em 2 minutos vemos chamar outro.
+              Se o motorista não responder em {minutodeEspera} minutos vemos chamar outro.
             </Heading>
             {/* <CountDown
               style={{
@@ -177,20 +179,18 @@ const CorridaAberta = ({ navigation }) => {
                   width: '50%'
                 }}
               />
-              
               <View style={{margin: 15}}>
                 {showCountdown && (
                   <CountDown
-                      millisInFuture={60 * 100}
+                      millisInFuture={minutodeEspera * 60000}
                       countDownInterval={1000}
                       onTick={value => {
-                        console.log(`Value onTick`, value)
+                        // console.log(`Value onTick`, value)
                         setRemainingCount(value);
                         convSeg(value)
                       }}
                       onFinish={() => {
-                        console.log(`Encerrou`)
-                        chamandoNovoMotorista(novaOrder, user)
+                        chamandoNovoMotorista(novaOrder, user, 'Demora em aceitar', 'EzTaxi')
                       }}>
                     <View
                       style={{
@@ -238,8 +238,8 @@ const CorridaAberta = ({ navigation }) => {
                   </CountDown>
                 )} 
               </View>
-              <View style={{margin: 15}}>
-                <Box pl="4" pr="5" py="2" bg={`amber.100`}>
+              <View style={{margin: 15, width:'100%'}}>
+                <Box pl="4" pr="5" py="2" bg={`amber.100`} style={{width:'100%'}}>
                   <Text>Chamando...</Text>
                   <HStack alignItems="center" mt={1} space={3}>
                     <Avatar size="48px" source={{
@@ -266,44 +266,49 @@ const CorridaAberta = ({ navigation }) => {
                   </HStack>
                 </Box>
               </View>
-              <TouchableOpacity
-                onPress={() => {
-                  // cancelarCorrida(novaOrder, 'Não informado')
-                  Alert.alert('Você quer cancelar esta corrida?', 'Você só pode cancelar até 3 corridas no mês', [
-                    {
-                      text: 'Sim, quero cancelar!',
-                      onPress: () => {
-                        // cont.remove()
-                        cancelarCorrida(novaOrder, 'Não informado', 'Cliente')
+              {statusCorrida === 'RECUSADO' && (
+                <Text>Corrida recusada</Text>
+              )}
+              {statusCorrida === 'PENDENTE' && (
+                <TouchableOpacity
+                  onPress={() => {
+                    // cancelarCorrida(novaOrder, 'Não informado')
+                    Alert.alert('Você quer cancelar esta corrida?', 'Você só pode cancelar até 3 corridas no mês', [
+                      {
+                        text: 'Sim, quero cancelar!',
+                        onPress: () => {
+                          // cont.remove()
+                          cancelarCorrida(novaOrder, 'Não informado', 'Cliente')
+                        },
                       },
-                    },
-                    {
-                      text: 'Não!',
-                      onPress: () => console.log('Cancel Pressed', 'Cliente'),
-                      style: 'cancel',
-                    },
-                  ]);
-                }}
-                style={{
-                  // width:'100%',
-                  //backgroundColor: '#22d3ee',
-                  borderColor: '#22d3ee',
-                  borderWidth: 2,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems:'center',
-                  padding: 10,
-                  borderRadius: 10,
-                  margin: 5
+                      {
+                        text: 'Não!',
+                        onPress: () => console.log('Cancel Pressed', 'Cliente'),
+                        style: 'cancel',
+                      },
+                    ]);
+                  }}
+                  style={{
+                    // width:'100%',
+                    //backgroundColor: '#22d3ee',
+                    borderColor: '#22d3ee',
+                    borderWidth: 2,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems:'center',
+                    padding: 10,
+                    borderRadius: 10,
+                    margin: 5
 
-                }}
-              >
-                <Text style={{color: '#22d3ee'}}>Cancelar Corrida</Text>
-              </TouchableOpacity>
+                  }}
+                >
+                  <Text style={{color: '#22d3ee'}}>Cancelar Corrida</Text>
+                </TouchableOpacity>
+              )}
           </View>
         </View>
       )}
-      {novaOrder.data.status === 'RECUSADO' && (
+      {/* {novaOrder.data.status === 'RECUSADO' && (
         <View style={styles.container}>
           <VStack width={'100%'} padding={2} borderRadius={10} space={4} alignItems="center" >
             <VStack space={4} alignItems="center">
@@ -346,7 +351,7 @@ const CorridaAberta = ({ navigation }) => {
               </TouchableOpacity>
           </View>
         </View>
-      )}
+      )} */}
       {(!isCaht && novaOrder.data.status === 'ACEITOU' || novaOrder.data.status === 'BUSCANDOPASSAGEIRO' || novaOrder.data.status === 'PEGOUPASSAGEIRO') && (
         <View style={styles.container}>
           <View style={{
@@ -463,7 +468,7 @@ const CorridaAberta = ({ navigation }) => {
               </View>
               {novaOrder.data.status === 'PEGOUPASSAGEIRO' && (
                 <TouchableOpacity
-                  onPress={() => alert('Estamos desenvolvendo esta funcionalidade.')}
+                  onPress={() => Alert.alert('Em breve', 'Estamos desenvolvendo esta funcionalidade.')}
                   style={{
                     // width:'100%',
                     //backgroundColor: '#22d3ee',
@@ -505,93 +510,6 @@ const CorridaAberta = ({ navigation }) => {
           </View>
         </View>
       )}
-      {/* {novaOrder.data.status === 'PEGOUPASSAGEIRO' && (
-        <View style={styles.container}>
-          <View style={{
-            marginTop:40, 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
-            flexDirection: 'column',
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            // minHeight: 50,
-            top: 0,
-            paddingBottom: 30,
-            zIndex: 9999
-          }}>
-            <Heading fontSize={20} p="4" pb="3">
-              Você já está no veículo
-            </Heading>
-            <Heading fontSize={14} p="4" pb="3" color={'gray.500'} textAlign={'center'}>
-              A EzTaxi agradece por usar nossos serviços, ao final desta corrida você será redirecinado para nossa tela de avaliação, sua contribuição é de grande importancia. Obrigado.
-            </Heading>
-          </View>
-        </View>
-      )} */}
-      {/* {novaOrder.data.status === 'BUSCANDOPASSAGEIRO' && (
-        <View style={styles.container}>
-          <Heading fontSize="xl" p="4" pb="3">
-            Veículo a caminho!
-          </Heading>
-          <Heading textAlign={'center'} fontSize="md" p="1" pb="1" color={'gray.400'} fontWeight='normal'>
-            Você possui uma corrida em aberto, aguarde o veículo na sua localização atual.
-          </Heading>
-          <LottieView
-              source={require('../../../assets/loading-23.json')} 
-              autoPlay loop 
-              style={{
-                width: '50%'
-              }}
-          />
-          <View style={{marginTop:20, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'row'}}>
-              <TouchableOpacity
-                onPress={() => {
-                  cancelarCorrida(novaOrder, 'Não informado')
-                }}
-                style={{
-                  // width:'100%',
-                  //backgroundColor: '#22d3ee',
-                  borderColor: '#22d3ee',
-                  borderWidth: 2,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems:'center',
-                  padding: 10,
-                  borderRadius: 10,
-                  margin: 5
-
-                }}
-              >
-                <Text style={{color: '#22d3ee'}}>Cancelar Corrida</Text>
-              </TouchableOpacity>
-          </View>
-          <View style={{marginTop: 20}}>
-
-            <Heading onPress={fecharAbrirChat} fontSize="md" p="1" pb="1" color={'gray.400'} fontWeight='normal'>
-              Fale com o motorista
-            </Heading>
-          </View>
-        </View>
-      )} */}
-      {/* {novaOrder.data.status === 'PEGOUPASSAGEIRO' && (
-        <View style={styles.container}>
-          <Heading fontSize="xl" p="4" pb="3">
-            Você já está no veículo!
-          </Heading>
-          <Heading textAlign={'center'} fontSize="md" p="1" pb="1" color={'gray.400'} fontWeight='normal'>
-            Fale com o motorista somente o indispensável. Esta tela será atualizada quando o motorsta finalizar a corrda.
-          </Heading>
-          <LottieView
-              source={require('../../../assets/loading-23.json')} 
-              autoPlay loop 
-              style={{
-                width: '50%'
-              }}
-          />
-        </View>
-      )} */}
       {isCaht && (
         // <View style={styles.container}>
           <Chat 

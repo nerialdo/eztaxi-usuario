@@ -41,6 +41,7 @@ import Geocoder from 'react-native-geocoding';
 import { useNavigation } from '@react-navigation/native';
 
 import { GiftedChat } from 'react-native-gifted-chat';
+import {format, addMinutes, isAfter, differenceInMilliseconds, millisecondsToMinutes } from "date-fns";
 
 // import { Audio } from 'expo-av';
 import aud from "../../assets/notificacoes/sound1.wav"
@@ -132,6 +133,7 @@ export const AuthProvider = ({children}) => {
 
     const navigation = useNavigation();
 
+    const [ultimaMessages, setUltimaMessages] = useState(null);
     const [messages, setMessages] = useState([]);
 
     const [orderStatus, setOrderStatus] = useState(null);
@@ -150,6 +152,8 @@ export const AuthProvider = ({children}) => {
     const [primeiraCorrida, setPrimeiraCorrida] = useState(false)
     const [config, setConfig] = useState(null)
     const [mudarLocalizacao, setMudarLocalizacao] = useState(null)
+    const [statusCorrida, setStatusCorrida] = useState(null)
+    const [minutodeEspera, setMinutodeEspera] = useState(2)
 
     const [request, response, promptAsync] = Google.useIdTokenAuthRequest(
         {
@@ -162,7 +166,7 @@ export const AuthProvider = ({children}) => {
     const [ valor, setValor ] = useState(null)
     const [ valorSemBonus, setValorSemBonus ] = useState(null)
     const [ valorBonus, setValorBonus ] = useState(20)
-    const [showCountdown, setShowCountdown] = useState(true);
+    const [showCountdown, setShowCountdown] = useState(false);
 
     // useEffect(() => {
     //     const interval = setInterval(() => {
@@ -190,11 +194,11 @@ export const AuthProvider = ({children}) => {
     useEffect(() => {
         // console.log('new Date(Timestamp.now().seconds*1000).toLocaleDateString()', new Date(Timestamp.now().seconds*1000).toLocaleDateString())
         // if (Platform.OS === 'android') {
-            registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
         // }
 
         notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-        setNotification(notification);
+            setNotification(notification);
         });
 
         responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
@@ -238,82 +242,69 @@ export const AuthProvider = ({children}) => {
         // return () => verific().abort();
     }, [])
 
-    const chamandoNovoMotorista = async (orderatual, useratual) => {
+    const chamandoNovoMotorista = async (orderatual, useratual, motivo, nomecancelou) => {
         setShowCountdown(false)
-        console.log(`orderatual`, orderatual)
+        setNovaOrder(null)
+        // console.log(`orderatual`, orderatual)
         var idmotoristaatual = orderatual.data.idMotorista
         var dadocorridaatual = orderatual.data
 
         //cancelar a atual
-        await cancelarCorrida(orderatual, 'Demora em aceitar', 'EzTaxi')
+        // console.log(`Cancelando corrida id `, orderatual)
+        await cancelarCorrida(orderatual, motivo, nomecancelou)
 
         try {
-            // setMotoristaLivre([])
-            const museums = query(collection(db, 'motoristas'), 
-            where("status", "==", 'Teste'), 
-            where("id", "!=", idmotoristaatual),limit(1),
-            where("tipoVeiculo", "==", dadocorridaatual.dadosCorrida.tipoVeiculo),limit(1),
-            );
-            // const querySnapshot = await getDocs(museums);
-            onSnapshot(museums, querySnapshot => {
-                // console.log('querySnapshot', querySnapshot.size)
-                if(querySnapshot.size === 0){
-                    setSemMotorista(false)
-                }else {
-                    querySnapshot.forEach((doc) => {
-                        console.log(doc.id, ' => ********** buscarMotoristaLivre', doc.data());
-                        // selected, 
-                        // valor, 
-                        // distancia,
-                        // destination,
-                        // duration,
-                        // yourLocation,
-                        // region,
-                        // primeiraCorrida,
-                        // valorSemBonus
+                // buscar o motorista disponivel
+                const museums = query(collection(db, 'motoristas'), 
+                where("status", "==", 'Teste'), 
+                where("id", "!=", idmotoristaatual),limit(1),
+                where("tipoVeiculo", "==", dadocorridaatual.dadosCorrida.tipoVeiculo),limit(1),
+                );
+                const querySnapshot = await getDocs(museums);
+                // querySnapshot.forEach((doc) => {
+                    console.log('querySnapshot', querySnapshot.size)
 
-                //         idMotorista: dadosCorrida.id,
-                // idCliente: user.id,
-                // dadosCorrida: dadosCorrida,
-                // yourLocation: yourLocation,
-                // yourGeoLocation: regionGeo,
-                // valor: valor,
-                // distancia: distancia,
-                // destination: destination,
-                // duration: duration,
-                // user: user,
-                // aceite: null,
-                // buscouPassageiro: false,
-                // buscandoPassageiro: null, // nullo sem interação, true buscando passageiro, false: saiu da rota de buscar passageiro
-                // status: 'PENDENTE',
-                // data: Timestamp.fromDate(new Date()),
-                // corridaBonus,
-                // valorSemBonus
-                        salvarOrder(
-                            doc.data(), 
-                            dadocorridaatual.valor,
-                            dadocorridaatual.distancia, 
-                            dadocorridaatual.destination, 
-                            dadocorridaatual.duration, 
-                            useratual, 
-                            dadocorridaatual.yourLocation, 
-                            dadocorridaatual.yourGeoLocation, //region, 
-                            dadocorridaatual.corridaBonus, 
-                            dadocorridaatual.valorSemBonus
-                        )
+                    if(querySnapshot.size === 0){
+                        setSemMotorista(false)
+                    }else {
+                        querySnapshot.forEach((doc) => {
+                            console.log(1)
+                            //verificar se já existe um corrida aberta para o motorista
+                            async function veriricarserexistecorridaabertaparamotorista(){
+                                // console.log(`=========== aqui motoristas livres 1`, doc.data(), doc.data().id)
+                                const qor = query(collection(db, "order"),
+                                where("status", "==", 'PENDENTE'), 
+                                where("idMotorista", "==", doc.data().id),limit(1));
+                                console.log(`=========== aqui motoristas livres *******`, doc.data())
+                                const querySnapshot = await getDocs(qor);
+                                console.log('querySnapshot buscar qto de order ativa', querySnapshot.size)
+                                if(querySnapshot.size === 0){
 
-                        // dadosMotoristas.push(doc.data())
-                    });
-                    setShowCountdown(true)
-                    // setMotoristaLivre(dadosMotoristas)
-                    // for (let m = 0; m < dadosMotoristas.length; m++) {
-                    //     const element = dadosMotoristas[m];
-                    //     console.log('dadosMotoristas **** for', element)
-                    //     // console.log('dadosMotoristas **** for 2', element.veiculos.length)
-                        
-                    // }
-                }
-            });
+                                    // console.log('Chamando outro agora ........')
+
+                                    salvarOrder(
+                                        doc.data(), 
+                                        dadocorridaatual.valor,
+                                        dadocorridaatual.distancia, 
+                                        dadocorridaatual.destination, 
+                                        dadocorridaatual.duration, 
+                                        useratual, 
+                                         dadocorridaatual.yourLocation, 
+                                        dadocorridaatual.yourGeoLocation, //region, 
+                                        dadocorridaatual.corridaBonus, 
+                                        dadocorridaatual.valorSemBonus
+                                    )
+                                    
+                                }else{
+                                    alert('Motorista não pode ser chamado. Já existe uma corrida aberta!')
+                                }
+                            }
+                            veriricarserexistecorridaabertaparamotorista()
+                        });
+                    }
+                // });
+
+            
     
         } catch (error) {
             console.log('Erro ao buscar motoristas livres ', error)
@@ -548,7 +539,7 @@ export const AuthProvider = ({children}) => {
 
     // buscar hitorico de corridas
     async function historicoChats(dados){
-        console.log('dados historicoChats ', dados)
+        // console.log('dados historicoChats ', dados)
         setLoadi(true)
         try {
             const q = query(collection(db, "chats"), where('idTransacao', '==', dados.id));
@@ -669,7 +660,7 @@ export const AuthProvider = ({children}) => {
     async function iniciarChat(idChat, idcliente){
         // alert('Monitorando mensagens ' + idChat + ' => ' + idcliente)
         setLoadi(true)
-        
+        setUltimaMessages(null)
         const collectionRef = collection(db, 'chats');
         const q = query(collectionRef, where('idTransacao', '==', idChat), orderBy("createdAt", "desc"));
     
@@ -680,9 +671,11 @@ export const AuthProvider = ({children}) => {
             }
             if(querySnapshot.size != 0) {
                 // querySnapshot.docs.map(doc => {
-                //     console.log('>>>>>>> querySnapshot iniciarChat',  doc.data())
+                //     if(doc.data().status === true){
+                //         console.log('>>>>>>> querySnapshot iniciarChat',  doc.data())
+                //     }
+                //     // setNovaMsg(true)
                 // })
-                // setNovaMsg(true)
                 setMessages(
                     querySnapshot.docs.map(doc => ({
                         _id: doc.data()._id,
@@ -707,6 +700,8 @@ export const AuthProvider = ({children}) => {
                 querySnapshot.docs.map(doc => {
                     if(doc.data().status){
                         setNovaMsg(true)
+                        console.log(`dados da mensagem`, doc.data())
+                        setUltimaMessages(doc.data())
                         // schedulePushNotificationLocal('Nova mensagem', 'Você tem mensagens não lidas')
                     }
                     // console.log('>>>>>>> querySnapshot iniciarChat',  doc.data())
@@ -824,13 +819,13 @@ export const AuthProvider = ({children}) => {
     async function cancelarCorrida(dados, motivo, quemcancelou){
 
         setLoading(true)
-        // console.log('PPPPPP ', dados)
+        // console.log('cancelarCorrida ', dados, motivo, quemcancelou)
         // alert(motivo)
         // console.log('cancelarCorridacancelarCorridacancelarCorrida', dados.id, motivo)
         if(dados){
             // console.log('cancelarCorrida', dados[0].id, motivo)
             try {
-                const userRef = doc(db, "order", dados.id);
+                const userRef = await doc(db, "order", dados.id);
                 await updateDoc(userRef, {
                     'status': 'CANCELADO',
                     'dataCancelamento': Timestamp.fromDate(new Date()),
@@ -872,8 +867,9 @@ export const AuthProvider = ({children}) => {
     // }
 
     async function verificarOrderAberta(id){
+        var arrNew = []
         //verifica ordem aberta do cliente
-        const collectionRef = collection(db, 'order');
+        const collectionRef = await collection(db, 'order');
         const q = query(
             collectionRef, 
             where('idCliente', '==', id), 
@@ -882,34 +878,113 @@ export const AuthProvider = ({children}) => {
             orderBy("data", "desc"),
             limit(1)
         );
-        onSnapshot(q, querySnapshot => {
-        //  console.log('querySnapshot verificarOrderAberta', querySnapshot, querySnapshot.size)
-            if(querySnapshot.size === 0){
-                setNovaOrder(null)
-            }else{
-                
-                querySnapshot.docs.map(doc => {
-                    // console.log('id verificarOrderAberta', doc.id)
-                    // console.log('querySnapshot verificarOrderAberta ', doc.id, doc.data(), doc.data().status)
-                    var dd = {'id': doc.id, 'data': doc.data()}
-                    if(doc.data().status === 'PENDENTE'){
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "added") {
+                    console.log("New Order: ", change.doc.data(), change.doc.data().status);
+                    if(snapshot.size === 0){
+                        setNovaOrder(null)
+                    }else{
+                        var dd = {'id': change.doc.id, 'data': change.doc.data()}
+
+                        if(change.doc.data().status === 'PENDENTE'){
+                            setNovaOrder(dd)
+                            setStatusCorrida('PENDENTE')
+                            // setShowCountdown(true)
+                        }else if(change.doc.data().status === 'RECUSADO'){
+                        
+                            var datadacorrida = change.doc.data().data.toDate()
+                            var resultdate = differenceInMilliseconds(new Date(), datadacorrida)
+                            
+                            if(millisecondsToMinutes(resultdate) <= minutodeEspera){
+                                Alert.alert('Atenção', 'A sua última corrida foi recusada, chame outro motorista!')
+                                setStatusCorrida('RECUSADO')
+                                // chamandoNovoMotorista(dd, doc.data().user, '', 'Motorista')
+                                // console.log('doc.data().status', change.doc.data(), new Date())
+                            }else{
+                                setNovaOrder(null)
+                                setShowCountdown(false)
+                            }
+                        
+                            
+                            // chamando outro motorista
+    
+                        }else if(change.doc.data().status === 'ACEITOU'){
+                            // setNovaOrder(null)
+                            setNovaOrder(dd)
+                            iniciarChat(change.doc.id, change.doc.data().idCliente)
+                            buscarLocalizacaoMotorista(change.doc.data().idMotorista)
+                        }else if(change.doc.data().status === 'BUSCANDOPASSAGEIRO'){
+                            setNovaOrder(dd)
+                            iniciarChat(change.doc.id, change.doc.data().idCliente)
+                            buscarLocalizacaoMotorista(change.doc.data().idMotorista)
+                            if(change.doc.data().avisoQueChegou){
+                                Vibration.vibrate(10 * 1000)
+                                Alert.alert(
+                                    "O Motorista chegou",
+                                    "O motorista já está no ponto esperando.",
+                                    [
+                                        {
+                                          text: "Ok",
+                                          onPress: () => Vibration.cancel(),
+                                          style: "cancel"
+                                        },
+                                        // { text: "Estou indo", onPress: () => {
+                                        //   alert('aqui')
+                                        // }}
+                                    ]
+                                );
+                                schedulePushNotificationLocal('O Motorista já chegou', 'O Motorista está chamando por você')
+                            }
+                        }else if(change.doc.data().status === 'PEGOUPASSAGEIRO'){
+                            setNovaOrder(dd)
+                            iniciarChat(change.doc.id, change.doc.data().idCliente)
+                            buscarLocalizacaoMotorista(change.doc.data().idMotorista)
+                        }else if(change.doc.data().status === 'FINALIZADO'){
+                            setNovaOrder(null)
+                            setShowCountdown(false)
+                        }else if(change.doc.data().status === 'CANCELADO'){
+                            setNovaOrder(null)
+                            setShowCountdown(false)
+                        }
+                    }
+                }
+                if (change.type === "modified") {
+                    console.log("Modified Order: ", change.doc.data());
+                    var dd = {'id': change.doc.id, 'data': change.doc.data()}
+                    if(change.doc.data().status === 'PENDENTE'){
                         setNovaOrder(dd)
-                    }else if(doc.data().status === 'RECUSADO'){
+                        setStatusCorrida('PENDENTE')
+                        // setShowCountdown(true)
+                    }else if(change.doc.data().status === 'RECUSADO'){
+                    
+                        var datadacorrida = change.doc.data().data.toDate()
+                        var resultdate = differenceInMilliseconds(new Date(), datadacorrida)
+                        
+                        if(millisecondsToMinutes(resultdate) <= minutodeEspera){
+                            Alert.alert('Atenção', 'A sua última corrida foi recusada, chame outro motorista!')
+                            setStatusCorrida('RECUSADO')
+                            // chamandoNovoMotorista(dd, doc.data().user, '', 'Motorista')
+                            // console.log('doc.data().status', change.doc.data(), new Date())
+                        }else{
+                            setNovaOrder(null)
+                            setShowCountdown(false)
+                        }
+                    
+                        
+                        // chamando outro motorista
+
+                    }else if(change.doc.data().status === 'ACEITOU'){
                         // setNovaOrder(null)
-                        // setOrderStatus({'status': 'Cancelado', 'quemCancelou': 'Motorista', 'dados': dd})
-                        // setNovaOrder(null)
-                        // setNovaOrder()
                         setNovaOrder(dd)
-                    }else if(doc.data().status === 'ACEITOU'){
-                        // setNovaOrder(null)
+                        iniciarChat(doc.id, change.doc.data().idCliente)
+                        buscarLocalizacaoMotorista(change.doc.data().idMotorista)
+                    }else if(change.doc.data().status === 'BUSCANDOPASSAGEIRO'){
                         setNovaOrder(dd)
-                        iniciarChat(doc.id, doc.data().idCliente)
-                        buscarLocalizacaoMotorista(doc.data().idMotorista)
-                    }else if(doc.data().status === 'BUSCANDOPASSAGEIRO'){
-                        setNovaOrder(dd)
-                        iniciarChat(doc.id, doc.data().idCliente)
-                        buscarLocalizacaoMotorista(doc.data().idMotorista)
-                        if(doc.data().avisoQueChegou){
+                        iniciarChat(change.doc.id, change.doc.data().idCliente)
+                        buscarLocalizacaoMotorista(change.doc.data().idMotorista)
+                        if(change.doc.data().avisoQueChegou){
                             Vibration.vibrate(10 * 1000)
                             Alert.alert(
                                 "O Motorista chegou",
@@ -925,43 +1000,123 @@ export const AuthProvider = ({children}) => {
                                     // }}
                                 ]
                             );
-
                             schedulePushNotificationLocal('O Motorista já chegou', 'O Motorista está chamando por você')
-                          
                         }
-                    }else if(doc.data().status === 'PEGOUPASSAGEIRO'){
+                    }else if(change.doc.data().status === 'PEGOUPASSAGEIRO'){
                         setNovaOrder(dd)
                         iniciarChat(doc.id, doc.data().idCliente)
                         buscarLocalizacaoMotorista(doc.data().idMotorista)
-                    }else if(doc.data().status === 'FINALIZADO'){
+                    }else if(change.doc.data().status === 'FINALIZADO'){
                         setNovaOrder(null)
-                    }else if(doc.data().status === 'CANCELADO'){
+                        setShowCountdown(false)
+                    }else if(change.doc.data().status === 'CANCELADO'){
                         setNovaOrder(null)
+                        setShowCountdown(false)
                     }
-                    // if(doc.data() && doc.data().aceite === true){
-                    //     console.log('Motorista aceitou 2')
-                    //     setAceite('sim')
-                    //     // delay(3000, dadosCorrida, 'sim')
-                        
-                    // }else if(doc.data() && doc.data().aceite === false){
-                    //     console.log('Motorista recusou 2')
-                    //     setAceite('nao')
-                    //     setNovaOrder(null)
-                    //     // setOrderStatus({'status': 'Cancelado', 'quemCancelou': 'Motorista'})
-                    //     var dd = {'id': doc.id, 'data': doc.data()}
-                    //     setOrderStatus({'status': 'Cancelado', 'quemCancelou': 'Motorista', 'dados': dd})
-                    //     // delay(7000, dadosCorrida, 'nao')
-                    // }else if(doc.data() && doc.data().aceite === null){
-                    //     console.log('Motorista ainda nao  2')
-                    //     setAceite('aguardando')
-                    //     // delay(7000, dadosCorrida, 'nao')
-                    // }
-                   
-                    // return {'id': doc.id, 'data': doc.data()} 
-                })
-                
-            }
+                    // setNovaOrder(null)
+                }
+                if (change.type === "removed") {
+                    console.log("Removed Order: ", change.doc.data());
+                    setNovaOrder(null)
+                }
+            });
         });
+        console.log(`++++=====================`, unsubscribe)
+          
+          // onSnapshot(q, querySnapshot => {
+        // //  console.log('querySnapshot verificarOrderAberta', querySnapshot, querySnapshot.size)
+        //     if(querySnapshot.size === 0){
+        //         setNovaOrder(null)
+        //     }else{
+                
+        //         querySnapshot.docs.map(doc => {
+        //             // console.log('id verificarOrderAberta', doc.id)
+        //             // console.log('querySnapshot verificarOrderAberta ', doc.id, doc.data(), doc.data().status)
+        //             var dd = {'id': doc.id, 'data': doc.data()}
+        //             if(doc.data().status === 'PENDENTE'){
+        //                 setNovaOrder(dd)
+        //                 setStatusCorrida('PENDENTE')
+        //                 // setShowCountdown(true)
+        //             }else if(doc.data().status === 'RECUSADO'){
+                    
+        //                 var datadacorrida = doc.data().data.toDate()
+        //                 var resultdate = differenceInMilliseconds(new Date(), datadacorrida)
+                        
+        //                 if(millisecondsToMinutes(resultdate) <= minutodeEspera){
+        //                     // chamandoNovoMotorista(dd, doc.data().user, '', 'Motorista')
+        //                     console.log('doc.data().status', doc.data(), new Date(), querySnapshot.size)
+        //                 }else{
+        //                     setNovaOrder(null)
+        //                     setShowCountdown(false)
+        //                 }
+                        
+        //                 setStatusCorrida('RECUSADO')
+        //                 // chamando outro motorista
+
+        //             }else if(doc.data().status === 'ACEITOU'){
+        //                 // setNovaOrder(null)
+        //                 setNovaOrder(dd)
+        //                 iniciarChat(doc.id, doc.data().idCliente)
+        //                 buscarLocalizacaoMotorista(doc.data().idMotorista)
+        //             }else if(doc.data().status === 'BUSCANDOPASSAGEIRO'){
+        //                 setNovaOrder(dd)
+        //                 iniciarChat(doc.id, doc.data().idCliente)
+        //                 buscarLocalizacaoMotorista(doc.data().idMotorista)
+        //                 if(doc.data().avisoQueChegou){
+        //                     Vibration.vibrate(10 * 1000)
+        //                     Alert.alert(
+        //                         "O Motorista chegou",
+        //                         "O motorista já está no ponto esperando.",
+        //                         [
+        //                             {
+        //                               text: "Ok",
+        //                               onPress: () => Vibration.cancel(),
+        //                               style: "cancel"
+        //                             },
+        //                             // { text: "Estou indo", onPress: () => {
+        //                             //   alert('aqui')
+        //                             // }}
+        //                         ]
+        //                     );
+
+        //                     schedulePushNotificationLocal('O Motorista já chegou', 'O Motorista está chamando por você')
+                          
+        //                 }
+        //             }else if(doc.data().status === 'PEGOUPASSAGEIRO'){
+        //                 setNovaOrder(dd)
+        //                 iniciarChat(doc.id, doc.data().idCliente)
+        //                 buscarLocalizacaoMotorista(doc.data().idMotorista)
+        //             }else if(doc.data().status === 'FINALIZADO'){
+        //                 setNovaOrder(null)
+        //                 setShowCountdown(false)
+        //             }else if(doc.data().status === 'CANCELADO'){
+        //                 setNovaOrder(null)
+        //                 setShowCountdown(false)
+        //             }
+        //             // if(doc.data() && doc.data().aceite === true){
+        //             //     console.log('Motorista aceitou 2')
+        //             //     setAceite('sim')
+        //             //     // delay(3000, dadosCorrida, 'sim')
+                        
+        //             // }else if(doc.data() && doc.data().aceite === false){
+        //             //     console.log('Motorista recusou 2')
+        //             //     setAceite('nao')
+        //             //     setNovaOrder(null)
+        //             //     // setOrderStatus({'status': 'Cancelado', 'quemCancelou': 'Motorista'})
+        //             //     var dd = {'id': doc.id, 'data': doc.data()}
+        //             //     setOrderStatus({'status': 'Cancelado', 'quemCancelou': 'Motorista', 'dados': dd})
+        //             //     // delay(7000, dadosCorrida, 'nao')
+        //             // }else if(doc.data() && doc.data().aceite === null){
+        //             //     console.log('Motorista ainda nao  2')
+        //             //     setAceite('aguardando')
+        //             //     // delay(7000, dadosCorrida, 'nao')
+        //             // }
+                   
+        //             // return {'id': doc.id, 'data': doc.data()} 
+        //         })
+                
+        //     }
+        // });
     }
     async function verificarOrder(id){
         onSnapshot(doc(db, "order", id), (doc) => {
@@ -997,7 +1152,7 @@ export const AuthProvider = ({children}) => {
                 // console.log('querySnapshot.size para verificar mensagem pendente', querySnapshot.size)
                 if(querySnapshot.size != 0) {
                     querySnapshot.docs.map(doc => {
-                        console.log('>>>>>>> querySnapshot editarUltimaMensagem', doc.id)
+                        // console.log('>>>>>>> querySnapshot editarUltimaMensagem', doc.id)
                         editarUltima(doc.id)
                     })
                 }else{
@@ -1008,8 +1163,10 @@ export const AuthProvider = ({children}) => {
                 console.log('Aditar msg', id)
                 const userRef = doc(db, "chats", id);
                 await updateDoc(userRef, {
-                    status: false
+                    status: false,
+                    horaVisto: Timestamp.fromDate(new Date()),
                 });
+                setUltimaMessages(null)
             }
             
             // // console.log('Usuário editado com sucesso')
@@ -1032,60 +1189,57 @@ export const AuthProvider = ({children}) => {
         corridaBonus,
         valorSemBonus
     ){
-
-        console.log('Salvando ordem para o motorista', dadosCorrida, 
-        valor, 
-        distancia, 
-        destination, 
-        duration, 
-        user,
-        yourLocation,
-        regionGeo,
-        corridaBonus,
-        valorSemBonus)
-        setAceite('aguardando')
+        console.log('Salvando ordem para o motorista #####################', dadosCorrida
         
+        
+        )
+        // console.log('Salvando ordem para o motorista', dadosCorrida, 
+        // valor, 
+        // distancia, 
+        // destination, 
+        // duration, 
+        // user,
+        // yourLocation,
+        // regionGeo,
+        // corridaBonus,
+        // valorSemBonus)
+        setAceite('aguardando')
+        setShowCountdown(true)
+
+        // verificar se tem corrida aberta para o motorista
+        var idmototista = dadosCorrida.id ? dadosCorrida.id : dadosCorrida.idMotorista
+        // console.log(`============================== idmotirsta`, idmototista)
+       
         try {
-            const docRef = await addDoc(collection(db, "order"), {
-                idMotorista: dadosCorrida.id,
-                idCliente: user.id,
-                dadosCorrida: dadosCorrida,
-                yourLocation: yourLocation,
-                yourGeoLocation: regionGeo,
-                valor: valor,
-                distancia: distancia,
-                destination: destination,
-                duration: duration,
-                user: user,
-                aceite: null,
-                buscouPassageiro: false,
-                buscandoPassageiro: null, // nullo sem interação, true buscando passageiro, false: saiu da rota de buscar passageiro
-                status: 'PENDENTE',
-                data: Timestamp.fromDate(new Date()),
-                corridaBonus,
-                valorSemBonus
-                // dataCancelamento: '',
-                // motivoCancelamento: motivo,
-                // quemCancelou: Cliente  
-            });
-            setIdTransacao(docRef.id)
-            verificarOrderAberta(user.id)
-            // verificarOrder(docRef.id)
 
-            // atualizar status do motirista 
-            // const motoristaRef = doc(db, "motoristas", dadosCorrida.id);
-            // await updateDoc(motoristaRef, {
-            //     status: 'Ocupado'
-            // });   
-
-
-            // setInfoCorrida(dadosCorrida)
-            // console.log("Document written with ID: ", docRef.id);
-            // enviar notificação para o motorista
-            schedulePushNotification(dadosCorrida.tokenPush, 'Passageiro chamando ...', 'Abra o app e aceite sua corrida!')
             
-            // Fazer chamda para o motorista
-            fazerChamadaMotorista(dadosCorrida?.telefone)
+                const docRef = await addDoc(collection(db, "order"), {
+                    idMotorista: dadosCorrida.id ? dadosCorrida.id : dadosCorrida.idMotorista,
+                    idCliente: user.id,
+                    dadosCorrida: dadosCorrida,
+                    yourLocation: yourLocation,
+                    yourGeoLocation: regionGeo,
+                    valor: valor,
+                    distancia: distancia,
+                    destination: destination,
+                    duration: duration,
+                    user: user,
+                    aceite: null,
+                    buscouPassageiro: false,
+                    buscandoPassageiro: null, // nullo sem interação, true buscando passageiro, false: saiu da rota de buscar passageiro
+                    status: 'PENDENTE',
+                    data: Timestamp.fromDate(new Date()),
+                    corridaBonus,
+                    valorSemBonus
+                    // dataCancelamento: '',
+                    // motivoCancelamento: motivo,
+                    // quemCancelou: Cliente  
+                });
+                console.log(`pedido feito`, docRef.id)
+                setIdTransacao(docRef.id)
+                verificarOrderAberta(user.id)
+                schedulePushNotification(dadosCorrida.tokenPush, 'Passageiro chamando ...', 'Abra o app e aceite sua corrida!')
+            
 
         } catch (error) {
             console.log('Erro ao salvar ordem', error, error.response)    
@@ -1127,12 +1281,6 @@ export const AuthProvider = ({children}) => {
                         dadosMotoristas.push(doc.data())
                     });
                     setMotoristaLivre(dadosMotoristas)
-                    // for (let m = 0; m < dadosMotoristas.length; m++) {
-                    //     const element = dadosMotoristas[m];
-                    //     console.log('dadosMotoristas **** for', element)
-                    //     // console.log('dadosMotoristas **** for 2', element.veiculos.length)
-                        
-                    // }
                 }
             });
     
@@ -1756,7 +1904,10 @@ export const AuthProvider = ({children}) => {
             valorSemBonus,
             valorBonus,
             showCountdown,
-            chamandoNovoMotorista
+            chamandoNovoMotorista,
+            statusCorrida,
+            minutodeEspera,
+            ultimaMessages
         }}>
             {children}
         </AuthContext.Provider>

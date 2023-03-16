@@ -112,114 +112,116 @@ const MapMonitoramento = ({distanciaTempo}) => {
             {/* <TouchableOpacity onPress={() => setMapView(!mapView)}>
                 <Text>Map</Text>
             </TouchableOpacity> */}
-            <MapView
-                provider={PROVIDER_GOOGLE}
-                style={styles.map}
-                initialRegion={{
-                    latitude: region.latitude,
-                    longitude: region.longitude,
-                    latitudeDelta: LATITUDE_DELTA,
-                    longitudeDelta: LATITUDE_DELTA * ASPECT_RATIO,
-                }}
-                // initialRegion={region}
-                // region={region}
-                onRegionChange={onRegionChange}
-                showsUserLocation
-                mapType={'standard'}
-                rotateEnabled={true}
-                scrollEnabled={true}
-                zoomEnabled={true}
-                showsCompass={true}
-                showsBuildings={true}
-                loadingEnabled={false}
-                showsMyLocationButton={true}
-                ref={map}
-            >
-                {localizacaoMotorista && (novaOrder.data.status != 'PEGOUPASSAGEIRO') && (
-                    <MapViewDirections
-                        // lineCap="square"
-                        lineDashPattern={[0]}
-                        origin={localizacaoMotorista}
-                        waypoints={ localizacaoMotorista ? (localizacaoMotorista.length > 2) ? localizacaoMotorista.slice(1, -1): undefined : ''}
-                        destination={region}
-                        apikey={'AIzaSyAQAGqFeeThBCPGZznbTg6QpcutU1nrDXA'}
-                        strokeWidth={3}
-                        strokeColor="green"
-                        mode={'DRIVING'}
-                        optimizeWaypoints={true}
-                        onStart={(params) => {
-                            // console.log(`Started routing between "${params.origin}" and "${params.destination}"`);
-                        }}
-                        onReady={result => {
-                            // console.log(`Distance: ${result.distance} km`)
-                            // console.log(`Duration: ${result.duration} min.`)
+            {region && (
+                <MapView
+                    provider={PROVIDER_GOOGLE}
+                    style={styles.map}
+                    initialRegion={{
+                        latitude: region?.latitude,
+                        longitude: region?.longitude,
+                        latitudeDelta: LATITUDE_DELTA,
+                        longitudeDelta: LATITUDE_DELTA * ASPECT_RATIO,
+                    }}
+                    // initialRegion={region}
+                    // region={region}
+                    onRegionChange={onRegionChange}
+                    showsUserLocation
+                    mapType={'standard'}
+                    rotateEnabled={true}
+                    scrollEnabled={true}
+                    zoomEnabled={true}
+                    showsCompass={true}
+                    showsBuildings={true}
+                    loadingEnabled={false}
+                    showsMyLocationButton={true}
+                    ref={map}
+                >
+                    {localizacaoMotorista && (novaOrder.data.status != 'PEGOUPASSAGEIRO') && (
+                        <MapViewDirections
+                            // lineCap="square"
+                            lineDashPattern={[0]}
+                            origin={localizacaoMotorista}
+                            waypoints={ localizacaoMotorista ? (localizacaoMotorista.length > 2) ? localizacaoMotorista.slice(1, -1): undefined : ''}
+                            destination={region}
+                            apikey={'AIzaSyAQAGqFeeThBCPGZznbTg6QpcutU1nrDXA'}
+                            strokeWidth={3}
+                            strokeColor="green"
+                            mode={'DRIVING'}
+                            optimizeWaypoints={true}
+                            onStart={(params) => {
+                                // console.log(`Started routing between "${params.origin}" and "${params.destination}"`);
+                            }}
+                            onReady={result => {
+                                // console.log(`Distance: ${result.distance} km`)
+                                // console.log(`Duration: ${result.duration} min.`)
 
-                            map.current.fitToCoordinates(result.coordinates, {
-                                edgePadding: {
+                                map.current.fitToCoordinates(result.coordinates, {
+                                    edgePadding: {
+                                        top: getPixelSize(50),
+                                        right: getPixelSize(50),
+                                        left: getPixelSize(50),
+                                        bottom: getPixelSize(350),
+                                    },
+                                });
+
+                                setLoadingMap(true)
+                                distanciaTempo({'distancia': result.distance, 'duracao': Math.floor(result.duration)})
+                            }}
+                            onError={(errorMessage) => {
+                            console.log('GOT AN ERROR', errorMessage);
+                            }}
+                        />
+                    )}
+                    {localizacaoMotorista && (
+                        <Marker
+                            coordinate={{ 
+                                latitude : localizacaoMotorista?.latitude , 
+                                longitude : localizacaoMotorista?.longitude
+                            }}
+                            flat={true}
+                            anchor={{ x: 0, y: 0 }}
+                            image={car2Png}
+                            title={'Motorista'}
+                            rotation={0}
+                        >
+                        </Marker>
+                    )}
+                    {localizacaoMotorista && (novaOrder.data.status === 'PEGOUPASSAGEIRO') && (
+                        <Directions 
+                            origin={{ latitude : localizacaoMotorista?.latitude , longitude : localizacaoMotorista?.longitude}}
+                            destination={novaOrder.data.destination}
+                            onReady={result => {
+                                // console.log('DADOS DA VIAGEM', result, region, destination)
+                                // console.log(`Distance: ${result.distance} km`)
+                                // console.log(`Duration: ${result.duration} min.`)
+                                // setDistancia(result.distance);
+                                // setDuration(Math.floor(result.duration));
+                                setLoadingMap(true)
+                                distanciaTempo({'distancia': result.distance, 'duracao': Math.floor(result.duration)})
+                                map.current.fitToCoordinates(result.coordinates, {
+                                    edgePadding: {
                                     top: getPixelSize(50),
                                     right: getPixelSize(50),
                                     left: getPixelSize(50),
                                     bottom: getPixelSize(350),
-                                },
-                            });
-
-                            setLoadingMap(true)
-                            distanciaTempo({'distancia': result.distance, 'duracao': Math.floor(result.duration)})
-                        }}
-                        onError={(errorMessage) => {
-                        console.log('GOT AN ERROR', errorMessage);
-                        }}
-                    />
-                )}
-                {localizacaoMotorista && (
-                    <Marker
-                        coordinate={{ 
-                            latitude : localizacaoMotorista?.latitude , 
-                            longitude : localizacaoMotorista?.longitude
-                        }}
-                        flat={true}
-                        anchor={{ x: 0, y: 0 }}
-                        image={car2Png}
-                        title={'Motorista'}
-                        rotation={0}
-                    >
-                    </Marker>
-                )}
-                {localizacaoMotorista && (novaOrder.data.status === 'PEGOUPASSAGEIRO') && (
-                    <Directions 
-                        origin={{ latitude : localizacaoMotorista?.latitude , longitude : localizacaoMotorista?.longitude}}
-                        destination={novaOrder.data.destination}
-                        onReady={result => {
-                            // console.log('DADOS DA VIAGEM', result, region, destination)
-                            // console.log(`Distance: ${result.distance} km`)
-                            // console.log(`Duration: ${result.duration} min.`)
-                            // setDistancia(result.distance);
-                            // setDuration(Math.floor(result.duration));
-                            setLoadingMap(true)
-                            distanciaTempo({'distancia': result.distance, 'duracao': Math.floor(result.duration)})
-                            map.current.fitToCoordinates(result.coordinates, {
-                                edgePadding: {
-                                top: getPixelSize(50),
-                                right: getPixelSize(50),
-                                left: getPixelSize(50),
-                                bottom: getPixelSize(350),
-                                },
-                            });
-                        }}
-                    />
-                )}
-                {novaOrder.data.status === 'PEGOUPASSAGEIRO' && (
-                    <Marker title={'Destino'} coordinate={novaOrder.data.destination} anchor={{ x: 0, y: 0 }}>
-                        <Image
-                            style={{
-                                width: 50,
-                                height: 50
+                                    },
+                                });
                             }}
-                            source={locationIcon}
                         />
-                    </Marker>
-                )}
-            </MapView>
+                    )}
+                    {novaOrder.data.status === 'PEGOUPASSAGEIRO' && (
+                        <Marker title={'Destino'} coordinate={novaOrder.data.destination} anchor={{ x: 0, y: 0 }}>
+                            <Image
+                                style={{
+                                    width: 50,
+                                    height: 50
+                                }}
+                                source={locationIcon}
+                            />
+                        </Marker>
+                    )}
+                </MapView>
+            )}
             {!loadingMap && (
                 <View
                     style={{

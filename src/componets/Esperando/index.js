@@ -112,9 +112,6 @@ const Esperando = ({
                   width: '100%'
                 }}
               />
-              {/* <Heading textAlign={'center'}>
-                <Text color="emerald.500">Aguardando resposta do motorista</Text>
-              </Heading> */}
               {idTransacao && (
                 <Button size={'md'} variant="ghost" onPress={() => {
                   // removerOrder(idTransacao)
@@ -129,7 +126,7 @@ const Esperando = ({
                   ID TRANSAÇÃO
                 </Text>
                 <Text mt="3" textAlign={'center'} fontWeight="medium" marginTop={-3}>
-                  {idTransacao}
+                  1a {idTransacao}
                 </Text>
               </VStack>
             </VStack>
@@ -160,7 +157,7 @@ const Esperando = ({
                   ID TRANSAÇÃO
                 </Text>
                 <Text mt="3" textAlign={'center'} fontWeight="medium" marginTop={-3}>
-                  {idTransacao}
+                 2a {idTransacao}
                 </Text>
               </VStack>
             </VStack>
@@ -200,7 +197,7 @@ const Esperando = ({
                   ID TRANSAÇÃO
                 </Text>
                 <Text mt="3" textAlign={'center'} fontWeight="medium" marginTop={-3}>
-                  {idTransacao}
+                  3a {idTransacao}
                 </Text>
               </VStack>
             </VStack>

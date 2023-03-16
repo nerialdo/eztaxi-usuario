@@ -10,7 +10,7 @@ import backImage from '../../../assets/back.png';
 import styled, { css } from 'styled-components/native';
 // import Geocoder from 'react-native-geocoding';
 import Details from '../../componets/Details';
-import Esperando from '../../componets/Esperando';
+// import Esperando from '../../componets/Esperando';
 // import { MaterialCommunityIcons, AntDesign, Entypo } from "@expo/vector-icons"
 import { Text, Button } from "native-base";
 
@@ -56,7 +56,7 @@ const Map = ({
     const [showModal, setShowModal] = useState(false);
     const [dadosCorrida, setDadosCorrida] = useState(null);
     const [valor, setValor] = useState(0);
-    const [telaConfirmacao, setTelaConfirmacao] = useState(false);
+    // const [telaConfirmacao, setTelaConfirmacao] = useState(false);
     const map = useRef();
 
     
@@ -71,16 +71,16 @@ const Map = ({
         buscarMotoristaLivre()
     }, []);
 
-    useEffect(() => {
-        // console.log('regionregionregion', region)
-        // console.log('yourLocation yourLocation', yourLocation, motoristaLivre)
-        const unsubscribe = navigation.addListener('focus', () => {
-            setTelaConfirmacao(false)
-        });
+    // useEffect(() => {
+    //     // console.log('regionregionregion', region)
+    //     // console.log('yourLocation yourLocation', yourLocation, motoristaLivre)
+    //     const unsubscribe = navigation.addListener('focus', () => {
+    //         setTelaConfirmacao(false)
+    //     });
     
-        // Return the function to unsubscribe from the event so it gets removed on unmount
-        return unsubscribe;
-    }, [navigation]);
+    //     // Return the function to unsubscribe from the event so it gets removed on unmount
+    //     return unsubscribe;
+    // }, [navigation]);
 
     // useEffect(() => {
     //     (async () => {
@@ -126,9 +126,9 @@ const Map = ({
     //     })();
     // }, []);
 
-    const desabilitarTelaEspera = () => {
-        setTelaConfirmacao(false)
-    }
+    // const desabilitarTelaEspera = () => {
+    //     setTelaConfirmacao(false)
+    // }
 
     const salvarPedido = (dadosCorrida, valor, distancia, destination, duration, yourLocation, region, corridaBonus, valorSemBonus) => {
         salvarOrder(dadosCorrida, valor, distancia, destination, duration, user, yourLocation, region, corridaBonus, valorSemBonus)
@@ -141,7 +141,7 @@ const Map = ({
         // handleBack()
         // handleMenuTop()
         // handleMenuTop2()
-        setTelaConfirmacao(true)
+        // setTelaConfirmacao(true)
         // navigation.push('Confirmacao');
     }
 
@@ -365,7 +365,7 @@ const Map = ({
                 />
             </>
             }
-            {telaConfirmacao && (
+            {/* {telaConfirmacao && (
                 <View>
                     <Esperando 
                         navigation={navigation}
@@ -374,7 +374,7 @@ const Map = ({
                         desabilitarTelaEspera={desabilitarTelaEspera}
                     />
                 </View>
-            )}
+            )} */}
           
         </View> 
     )

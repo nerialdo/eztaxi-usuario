@@ -23,6 +23,7 @@ const Details = ({distancia, navigation, destination, duration, abrirConfirmacao
     setValor,
     setValorSemBonus,
     setValorBonus,
+    statusCorrida
   } = useAuth()
 
   // const [ selected, setSelected ] = useState(null)
@@ -32,7 +33,7 @@ const Details = ({distancia, navigation, destination, duration, abrirConfirmacao
 
   useEffect(() => {
     buscarMotoristaLivre()
-    console.log('*** motoristaLivre', motoristaLivre, distancia, yourLocation, destination)
+    // console.log('*** motoristaLivre', motoristaLivre, distancia, yourLocation, destination)
 
   }, [])
 
@@ -128,6 +129,13 @@ const Details = ({distancia, navigation, destination, duration, abrirConfirmacao
         selected={selected}
       >
         <View >
+          {statusCorrida === 'RECUSADO' && (
+            <View style={{ padding: 5, marginBottom: 5}}>
+                <Text style={{fontWeight:'bold', textAlign: 'center'}}>
+                  O Motorista recusou a sua corrida. solicite outro!
+                </Text>
+            </View>
+          )}
             <View style={{ padding: 5, marginBottom: 5}}>
               {primeiraCorrida && (
                 <Text style={{fontWeight:'bold', textAlign: 'center', color: 'green', fontSize: 18}}>

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { StyleSheet, View, ActivityIndicator, Text, Platform } from "react-native";
+import { StyleSheet, View, ActivityIndicator, Text, Platform, TouchableOpacity } from "react-native";
 
 import { Avatar, Center} from "native-base";
 
@@ -11,8 +11,6 @@ import AuthRoutes from "./auth.routes";
 import AppRoutes from "./app.routes";
 
 // import TipoUsuario from "./tipousuario.routes";
-
-// import AlertMsg from "../componets/AlertMsg";
 
 import Stagger from "../componets/Stagger";
 
@@ -34,8 +32,11 @@ const Routes = () => {
         orderStatus, 
         limparOrderStatus, 
         novaMsg,
-        completarPerfil
+        completarPerfil,
+        ultimaMessages,
+        editarUltimaMensagem
     } = useAuth()
+    console.log('novaMsgnovaMsgnovaMsgnovaMsg ', novaMsg)
     // console.log("loading page Routes", signed, loading, novaOrder, aceite, orderStatus)
     // console.log("loading page Routes", signed, loading, novaOrder, aceite, orderStatus)
     // console.log("loading page Routes", signed, loading, novaOrder)
@@ -44,6 +45,31 @@ const Routes = () => {
         return (
             <View style={styles.container}>
                 <ActivityIndicator size="large" color="#666" />
+            </View>
+        )
+    }
+   
+    if(ultimaMessages){
+        return (
+            <View style={styles.containerMsg}>
+                <Text style={{fontSize: 18}}>{'Você possui uma mensagem: '}</Text>
+                <Text>{'Mensagem do Motorista'}</Text>
+                <Text style={{color:'black', textAlign: 'center', fontSize: 17, marginTop: 10}}> {'=> '} {ultimaMessages.text}</Text>
+                <TouchableOpacity 
+                    onPress={() => {
+                        editarUltimaMensagem(ultimaMessages.sentTo)
+                    }}
+                    style={{backgroundColor:'green', padding: 10, width: '80%', borderRadius: 10, marginTop: 20}}>
+                    <Text style={{color:'white', textAlign: 'center'}}>Marcar como visto</Text>
+                </TouchableOpacity>
+                {/* <TouchableOpacity 
+                    onPress={() => {
+                        // editarUltimaMensagem(order?.data?.idCliente)
+                        alert('Responder')
+                    }}
+                    style={{backgroundColor:'blue', padding: 10, width: '80%', borderRadius: 10, marginTop: 10}}>
+                    <Text style={{color:'white', textAlign: 'center'}}>Responder</Text>
+                </TouchableOpacity> */}
             </View>
         )
     }
@@ -57,16 +83,11 @@ const Routes = () => {
     if(novaOrder){
         return (
             <View style={styles.container}>
-                {/* {novaMsg && (
-                    <View style={styles.InfoGeralTop}>
-                        <AlertMsg novaMsg={novaMsg} />
-                    </View>
-                )} */}
-                
                 <CorridaAberta />
             </View>
         )
     }
+
 
     return signed ? 
         <>
@@ -86,6 +107,12 @@ const Routes = () => {
 export default Routes;
 
 const styles = StyleSheet.create({
+    containerMsg: {
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     container: {
         flex: 1,
         backgroundColor: '#fff',
