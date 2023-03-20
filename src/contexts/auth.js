@@ -256,7 +256,7 @@ export const AuthProvider = ({children}) => {
         try {
                 // buscar o motorista disponivel
                 const museums = query(collection(db, 'motoristas'), 
-                where("status", "==", 'Teste'), 
+                where("status", "==", 'Livre'), 
                 where("id", "!=", idmotoristaatual),limit(1),
                 where("tipoVeiculo", "==", dadocorridaatual.dadosCorrida.tipoVeiculo),limit(1),
                 );
@@ -1239,7 +1239,7 @@ export const AuthProvider = ({children}) => {
                 setIdTransacao(docRef.id)
                 verificarOrderAberta(user.id)
                 schedulePushNotification(dadosCorrida.tokenPush, 'Passageiro chamando ...', 'Abra o app e aceite sua corrida!')
-            
+                fazerChamadaMotorista(dadosCorrida?.telefone)
 
         } catch (error) {
             console.log('Erro ao salvar ordem', error, error.response)    
@@ -1268,7 +1268,7 @@ export const AuthProvider = ({children}) => {
         // console.log('buscarMotoristaLivre')
         try {
             setMotoristaLivre([])
-            const museums = query(collection(db, 'motoristas'), where("status", "==", 'Teste'));
+            const museums = query(collection(db, 'motoristas'), where("status", "==", 'Livre'));
             // const querySnapshot = await getDocs(museums);
             onSnapshot(museums, querySnapshot => {
                 var dadosMotoristas = []
