@@ -367,21 +367,50 @@ const CorridaAberta = ({ navigation }) => {
             paddingBottom: 30,
             zIndex: 9999
           }}>
-          {novaOrder.data.status === 'ACEITOU' && (
-            <Heading fontSize="md" p="4" pb="3">
-                O Motorista aceitou, aguarde.
-            </Heading>
-          )}
-          {novaOrder.data.status === 'BUSCANDOPASSAGEIRO' && (
-            <Heading fontSize="md" p="4" pb="3">
-                O Motorista já está a caminho, aguarde.
-            </Heading>
-          )}
-          {novaOrder.data.status === 'PEGOUPASSAGEIRO' && (
-            <Heading fontSize="md" p="4" pb="3">
-                Você já está no veículo
-            </Heading>
-          )}
+            {novaOrder.data.status === 'ACEITOU' && (
+              <Heading fontSize="md" p="4" pb="3">
+                  O Motorista aceitou, aguarde.
+              </Heading>
+            )}
+            {novaOrder.data.status === 'BUSCANDOPASSAGEIRO' && (
+              <Heading fontSize="md" p="4" pb="3">
+                  O Motorista já está a caminho, aguarde.
+              </Heading>
+            )}
+            {novaOrder.data.status === 'PEGOUPASSAGEIRO' && (
+              <Heading fontSize="md" p="4" pb="3" bg="red">
+                  Você já está no veículo
+              </Heading>
+            )}
+          </View>
+          <View style={{
+            marginTop:80, 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            flexDirection: 'row',
+            position: 'absolute',
+            width: '100%',
+            minHeight: 50,
+            top: 0,
+            paddingBottom: 30,
+            zIndex: 9999
+          }}>
+            {novaOrder.data.taximetro && (
+              <Heading fontSize="md" p="2" pb="1" style={{backgroundColor: 'gray', color: 'white'}}>
+                  Taxímetro
+              </Heading>
+            )}
+            {novaOrder.data.taximetro && (
+              <Heading fontSize="md" p="2" pb="1" style={{backgroundColor: novaOrder.data?.taximetroEmExecucao ? 'green' : 'red', color: 'white'}}>
+                  {novaOrder.data?.taximetroEmExecucao ? 'Ativado' : 'Parado'}
+              </Heading>
+            )}
+            {novaOrder.data.taximetro && (
+              <Heading fontSize="md" p="2" pb="1" style={{borderWidth: 2}}>
+                  {moedaBR(novaOrder.data?.valorTaximentro)}
+              </Heading>
+            )}
           </View>
           <MapMonitoramento distanciaTempo={distanciaTempo} />
 

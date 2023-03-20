@@ -882,19 +882,19 @@ export const AuthProvider = ({children}) => {
 
             snapshot.docChanges().forEach((change) => {
                 if (change.type === "added") {
-                    console.log("New Order: ", change.doc.data(), change.doc.data().status);
+                    console.log("New Order: ", change.doc?.data(), change.doc?.data().status);
                     if(snapshot.size === 0){
                         setNovaOrder(null)
                     }else{
-                        var dd = {'id': change.doc.id, 'data': change.doc.data()}
+                        var dd = {'id': change.doc?.id, 'data': change.doc?.data()}
 
-                        if(change.doc.data().status === 'PENDENTE'){
+                        if(change.doc?.data().status === 'PENDENTE'){
                             setNovaOrder(dd)
                             setStatusCorrida('PENDENTE')
                             // setShowCountdown(true)
-                        }else if(change.doc.data().status === 'RECUSADO'){
+                        }else if(change.doc?.data().status === 'RECUSADO'){
                         
-                            var datadacorrida = change.doc.data().data.toDate()
+                            var datadacorrida = change.doc?.data().data.toDate()
                             var resultdate = differenceInMilliseconds(new Date(), datadacorrida)
                             
                             if(millisecondsToMinutes(resultdate) <= minutodeEspera){
@@ -910,16 +910,16 @@ export const AuthProvider = ({children}) => {
                             
                             // chamando outro motorista
     
-                        }else if(change.doc.data().status === 'ACEITOU'){
+                        }else if(change.doc?.data().status === 'ACEITOU'){
                             // setNovaOrder(null)
                             setNovaOrder(dd)
-                            iniciarChat(change.doc.id, change.doc.data().idCliente)
-                            buscarLocalizacaoMotorista(change.doc.data().idMotorista)
-                        }else if(change.doc.data().status === 'BUSCANDOPASSAGEIRO'){
+                            iniciarChat(change.doc?.id, change.doc?.data().idCliente)
+                            buscarLocalizacaoMotorista(change.doc?.data().idMotorista)
+                        }else if(change.doc?.data().status === 'BUSCANDOPASSAGEIRO'){
                             setNovaOrder(dd)
-                            iniciarChat(change.doc.id, change.doc.data().idCliente)
-                            buscarLocalizacaoMotorista(change.doc.data().idMotorista)
-                            if(change.doc.data().avisoQueChegou){
+                            iniciarChat(change.doc?.id, change.doc?.data().idCliente)
+                            buscarLocalizacaoMotorista(change.doc?.data().idMotorista)
+                            if(change.doc?.data().avisoQueChegou){
                                 Vibration.vibrate(10 * 1000)
                                 Alert.alert(
                                     "O Motorista chegou",
@@ -937,29 +937,29 @@ export const AuthProvider = ({children}) => {
                                 );
                                 schedulePushNotificationLocal('O Motorista já chegou', 'O Motorista está chamando por você')
                             }
-                        }else if(change.doc.data().status === 'PEGOUPASSAGEIRO'){
+                        }else if(change.doc?.data().status === 'PEGOUPASSAGEIRO'){
                             setNovaOrder(dd)
-                            iniciarChat(change.doc.id, change.doc.data().idCliente)
-                            buscarLocalizacaoMotorista(change.doc.data().idMotorista)
-                        }else if(change.doc.data().status === 'FINALIZADO'){
+                            iniciarChat(change.doc?.id, change.doc?.data().idCliente)
+                            buscarLocalizacaoMotorista(change.doc?.data().idMotorista)
+                        }else if(change.doc?.data().status === 'FINALIZADO'){
                             setNovaOrder(null)
                             setShowCountdown(false)
-                        }else if(change.doc.data().status === 'CANCELADO'){
+                        }else if(change.doc?.data().status === 'CANCELADO'){
                             setNovaOrder(null)
                             setShowCountdown(false)
                         }
                     }
                 }
                 if (change.type === "modified") {
-                    console.log("Modified Order: ", change.doc.data());
-                    var dd = {'id': change.doc.id, 'data': change.doc.data()}
-                    if(change.doc.data().status === 'PENDENTE'){
+                    console.log("Modified Order: ", change.doc?.data());
+                    var dd = {'id': change.doc?.id, 'data': change.doc?.data()}
+                    if(change.doc?.data().status === 'PENDENTE'){
                         setNovaOrder(dd)
                         setStatusCorrida('PENDENTE')
                         // setShowCountdown(true)
-                    }else if(change.doc.data().status === 'RECUSADO'){
+                    }else if(change.doc?.data().status === 'RECUSADO'){
                     
-                        var datadacorrida = change.doc.data().data.toDate()
+                        var datadacorrida = change.doc?.data().data.toDate()
                         var resultdate = differenceInMilliseconds(new Date(), datadacorrida)
                         
                         if(millisecondsToMinutes(resultdate) <= minutodeEspera){
@@ -975,16 +975,16 @@ export const AuthProvider = ({children}) => {
                         
                         // chamando outro motorista
 
-                    }else if(change.doc.data().status === 'ACEITOU'){
+                    }else if(change.doc?.data().status === 'ACEITOU'){
                         // setNovaOrder(null)
                         setNovaOrder(dd)
-                        iniciarChat(doc.id, change.doc.data().idCliente)
-                        buscarLocalizacaoMotorista(change.doc.data().idMotorista)
-                    }else if(change.doc.data().status === 'BUSCANDOPASSAGEIRO'){
+                        iniciarChat(doc.id, change.doc?.data().idCliente)
+                        buscarLocalizacaoMotorista(change.doc?.data().idMotorista)
+                    }else if(change.doc?.data().status === 'BUSCANDOPASSAGEIRO'){
                         setNovaOrder(dd)
-                        iniciarChat(change.doc.id, change.doc.data().idCliente)
-                        buscarLocalizacaoMotorista(change.doc.data().idMotorista)
-                        if(change.doc.data().avisoQueChegou){
+                        iniciarChat(change.doc?.id, change.doc?.data().idCliente)
+                        buscarLocalizacaoMotorista(change.doc?.data().idMotorista)
+                        if(change.doc?.data().avisoQueChegou){
                             Vibration.vibrate(10 * 1000)
                             Alert.alert(
                                 "O Motorista chegou",
@@ -1002,21 +1002,21 @@ export const AuthProvider = ({children}) => {
                             );
                             schedulePushNotificationLocal('O Motorista já chegou', 'O Motorista está chamando por você')
                         }
-                    }else if(change.doc.data().status === 'PEGOUPASSAGEIRO'){
+                    }else if(change.doc?.data().status === 'PEGOUPASSAGEIRO'){
                         setNovaOrder(dd)
-                        iniciarChat(doc.id, doc.data().idCliente)
-                        buscarLocalizacaoMotorista(doc.data().idMotorista)
-                    }else if(change.doc.data().status === 'FINALIZADO'){
+                        iniciarChat(change.doc?.id, change.doc?.data().idCliente)
+                        buscarLocalizacaoMotorista(change.doc?.data().idMotorista)
+                    }else if(change.doc?.data().status === 'FINALIZADO'){
                         setNovaOrder(null)
                         setShowCountdown(false)
-                    }else if(change.doc.data().status === 'CANCELADO'){
+                    }else if(change.doc?.data().status === 'CANCELADO'){
                         setNovaOrder(null)
                         setShowCountdown(false)
                     }
                     // setNovaOrder(null)
                 }
                 if (change.type === "removed") {
-                    console.log("Removed Order: ", change.doc.data());
+                    console.log("Removed Order: ", change.doc?.data());
                     setNovaOrder(null)
                 }
             });
