@@ -49,15 +49,15 @@ const Routes = () => {
         )
     }
    
-    if(ultimaMessages){
+    if(novaMsg){
         return (
             <View style={styles.containerMsg}>
                 <Text style={{fontSize: 18}}>{'Você possui uma mensagem: '}</Text>
                 <Text>{'Mensagem do Motorista'}</Text>
-                <Text style={{color:'black', textAlign: 'center', fontSize: 17, marginTop: 10}}> {'=> '} {ultimaMessages.text}</Text>
+                <Text style={{color:'black', textAlign: 'center', fontSize: 17, marginTop: 10}}> {'=> '} {ultimaMessages?.text}</Text>
                 <TouchableOpacity 
                     onPress={() => {
-                        editarUltimaMensagem(ultimaMessages.sentTo)
+                        editarUltimaMensagem(ultimaMessages?.sentTo)
                     }}
                     style={{backgroundColor:'green', padding: 10, width: '80%', borderRadius: 10, marginTop: 20}}>
                     <Text style={{color:'white', textAlign: 'center'}}>Marcar como visto</Text>

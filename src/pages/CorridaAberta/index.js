@@ -383,35 +383,25 @@ const CorridaAberta = ({ navigation }) => {
               </Heading>
             )}
           </View>
-          <View style={{
-            marginTop:80, 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
-            flexDirection: 'row',
-            position: 'absolute',
-            width: '100%',
-            minHeight: 50,
-            top: 0,
-            paddingBottom: 30,
-            zIndex: 9999
-          }}>
-            {novaOrder.data.taximetro && (
-              <Heading fontSize="md" p="2" pb="1" style={{backgroundColor: 'gray', color: 'white'}}>
-                  Taxímetro
-              </Heading>
-            )}
-            {novaOrder.data.taximetro && (
-              <Heading fontSize="md" p="2" pb="1" style={{backgroundColor: novaOrder.data?.taximetroEmExecucao ? 'green' : 'red', color: 'white'}}>
-                  {novaOrder.data?.taximetroEmExecucao ? 'Ativado' : 'Parado'}
-              </Heading>
-            )}
-            {novaOrder.data.taximetro && (
-              <Heading fontSize="md" p="2" pb="1" style={{borderWidth: 2}}>
-                  {moedaBR(novaOrder.data?.valorTaximentro)}
-              </Heading>
-            )}
-          </View>
+          {novaOrder.data && (
+            <View style={{
+              marginTop:80, 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              flexDirection: 'row',
+              position: 'absolute',
+              width: '100%',
+              minHeight: 50,
+              top: 0,
+              paddingBottom: 30,
+              zIndex: 9999
+            }}>
+                <Heading fontSize="md" p="2" pb="1" style={{fontSize: 21, backgroundColor: '#ADD8E6', borderRadius: 10, color: '#0000FF'}}>
+                    R$ {moedaBR(novaOrder.data.valor)}
+                </Heading>
+            </View>
+          )}
           <MapMonitoramento distanciaTempo={distanciaTempo} />
 
           {/* <View style={{
@@ -445,6 +435,33 @@ const CorridaAberta = ({ navigation }) => {
             bottom: 0,
             paddingBottom: 30
           }}>
+            {novaOrder.data.taximetro && (
+              <View style={{
+                marginTop:5, 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                flexDirection: 'row',
+                width: '100%',
+                zIndex: 9999
+              }}>
+                {novaOrder.data.taximetro && (
+                  <Heading fontSize="md" p="2" pb="1" style={{backgroundColor: 'gray', color: 'white'}}>
+                      Taxímetro
+                  </Heading>
+                )}
+                {novaOrder.data.taximetro && (
+                  <Heading fontSize="md" p="2" pb="1" style={{backgroundColor: novaOrder.data?.taximetroEmExecucao ? 'green' : 'red', color: 'white'}}>
+                      {novaOrder.data?.taximetroEmExecucao ? 'Ativado' : 'Parado'}
+                  </Heading>
+                )}
+                {novaOrder.data.taximetro && (
+                  <Heading fontSize="md" p="2" pb="1" style={{borderWidth: 2}}>
+                      {moedaBR(novaOrder.data?.valorTaximentro)}
+                  </Heading>
+                )}
+              </View>
+            )}
               {/* <TouchableOpacity
                 onPress={() => {
                   cancelarCorrida(novaOrder, 'Não informado')
@@ -494,6 +511,19 @@ const CorridaAberta = ({ navigation }) => {
                   <Text>Chega em</Text>
                   <Text style={{fontSize: 19, fontWeight: 'bold'}}>{converterMinuto(duration)}</Text>
                 </View>
+                {novaOrder.data.taximetro && (
+                  <View
+                    style={{
+                      justifyContent: 'center', 
+                      alignItems: 'center', 
+                      flexDirection: 'column',
+                      padding: 5
+                    }}
+                  >
+                    <Text>Valor Tx</Text>
+                    <Text style={{fontSize: 19, fontWeight: 'bold'}}>{moedaBR(novaOrder.data?.dadosCorrida?.tarifa?.km)}/Min</Text>
+                  </View>
+                )}
               </View>
               {novaOrder.data.status === 'PEGOUPASSAGEIRO' && (
                 <TouchableOpacity

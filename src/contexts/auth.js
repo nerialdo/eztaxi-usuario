@@ -416,16 +416,34 @@ export const AuthProvider = ({children}) => {
         }
     }
 
-    async function carregarLocalizazao(){
+    const atualizarCidadeEstado = async (dadosuser, cidade, estado) => {
+        console.log(dadosuser, cidade, estado)
+        setLoading(true)
+        try {
+            // imagemPerfil ? uploadImage(imagemPerfil, imageMeta) : '';
+            const userRef = doc(db, "users", dadosuser.id);
+            await updateDoc(userRef, {
+                cidade: cidade,
+                estado: estado
+            });
+            // console.log('Usuário editado com sucesso')
+            setLoading(false)
+        } catch (error) {
+            console.log('Erro ao altualizar cidade e estado do cliente', error)
+            setLoading(false)
+        }
+    }
+
+    async function carregarLocalizazao(us){
         // setLoading(true)
-        console.log('location =======================================', 1)
+        // console.log('location =======================================', 1)
         let { status } = await Location.requestForegroundPermissionsAsync();
-        console.log('location =======================================', 2, status)
+        // console.log('location =======================================', 2, status)
           if (status !== 'granted') {
             setErrorMsg('Permission to access location was denied');
             return;
           }
-          console.log('location =======================================', 3)
+        //   console.log('location =======================================', 3)
 
           try {
               
@@ -433,9 +451,9 @@ export const AuthProvider = ({children}) => {
                     //accuracy: Location.Accuracy.BestForNavigation,
                     //distanceInterval: 5
                 });
-                console.log('location =======================================', locationGeo)
+                // console.log('location =======================================', locationGeo)
                 setLoading(false)
-                console.log('location', locationGeo.coords)
+                // console.log('location', locationGeo.coords)
                 // setLocation(location);
                 setRegion({
                     latitude: locationGeo.coords.latitude,
@@ -462,18 +480,23 @@ export const AuthProvider = ({children}) => {
               //   console.log('addressComponents', addressComponents)
                 let resCidadade = addressComponents.filter(addres => addres.types[0] === 'administrative_area_level_2')
                 let resEstado = addressComponents.filter(addres => addres.types[0] === 'administrative_area_level_1')
-                
+                console.log(' resCidadade', resCidadade)
                 setCidadeEstado({
                   'cidade' : resCidadade[0].long_name,
                   'estado' : resEstado[0].long_name
                 })
       
-                console.log('if', cidadeEstado)
+                // console.log('if', us)
+                if(us){
+                    atualizarCidadeEstado(us,  resCidadade[0].long_name,  resEstado[0].long_name)
+                }
                 setLocation(address.substring(0, address.indexOf(",")))
           } catch (error) {
             console.log(`Error locationGeo`, error)
             setLoading(false)
           }
+
+          
 
           
     }
@@ -602,6 +625,7 @@ export const AuthProvider = ({children}) => {
     async function addNewChat({_id, text, createdAt, user : usuario}) {
         console.log('Dados em addNewCha ', _id, text, createdAt, usuario, usuario.to)
         // alert("Enviando mensagem push para motorista"+ usuario.to.expoPushToken)
+        setUltimaMessages(null)
         try {
             const mymsg = {
                 _id,
@@ -660,7 +684,7 @@ export const AuthProvider = ({children}) => {
     async function iniciarChat(idChat, idcliente){
         // alert('Monitorando mensagens ' + idChat + ' => ' + idcliente)
         setLoadi(true)
-        setUltimaMessages(null)
+        // setUltimaMessages(null)
         const collectionRef = collection(db, 'chats');
         const q = query(collectionRef, where('idTransacao', '==', idChat), orderBy("createdAt", "desc"));
     
@@ -676,6 +700,13 @@ export const AuthProvider = ({children}) => {
                 //     }
                 //     // setNovaMsg(true)
                 // })
+                querySnapshot.docs.map(doc => {
+                    console.log('=+===' ,doc.data().status)
+                    if(doc.data().status && doc.data().sentTo == idcliente){
+                        setNovaMsg(true)
+                        setUltimaMessages(doc.data())
+                    }
+                })
                 setMessages(
                     querySnapshot.docs.map(doc => ({
                         _id: doc.data()._id,
@@ -690,24 +721,24 @@ export const AuthProvider = ({children}) => {
         });
 
         // const collectionRef2 = collection(db, 'chats');
-        const q2 = query(collectionRef, where('idTransacao', '==', idChat),  where('sentTo', '==', idcliente), where('status', '==', true), orderBy("createdAt", "desc"));
-        onSnapshot(q2, querySnapshot => {
-            // AlertDialog('aquiß')
-            // console.log('querySnapshot.size para verificar mensagem pendente', querySnapshot.size)
-            if(querySnapshot.size === 0) {
-                setNovaMsg(false)
-            }else{
-                querySnapshot.docs.map(doc => {
-                    if(doc.data().status){
-                        setNovaMsg(true)
-                        console.log(`dados da mensagem`, doc.data())
-                        setUltimaMessages(doc.data())
-                        // schedulePushNotificationLocal('Nova mensagem', 'Você tem mensagens não lidas')
-                    }
-                    // console.log('>>>>>>> querySnapshot iniciarChat',  doc.data())
-                })
-            }
-        })
+        // const q2 = query(collectionRef, where('idTransacao', '==', idChat),  where('sentTo', '==', idcliente), where('status', '==', true), orderBy("createdAt", "desc"));
+        // onSnapshot(q2, querySnapshot => {
+        //     // AlertDialog('aquiß')
+        //     // console.log('querySnapshot.size para verificar mensagem pendente', querySnapshot.size)
+        //     if(querySnapshot.size === 0) {
+        //         setNovaMsg(false)
+        //     }else{
+        //         querySnapshot.docs.map(doc => {
+        //             if(doc.data().status){
+        //                 setNovaMsg(true)
+        //                 console.log(`dados da mensagem`, doc.data())
+        //                 setUltimaMessages(doc.data())
+        //                 // schedulePushNotificationLocal('Nova mensagem', 'Você tem mensagens não lidas')
+        //             }
+        //             // console.log('>>>>>>> querySnapshot iniciarChat',  doc.data())
+        //         })
+        //     }
+        // })
         // try {
 
         //     const collectionRef = collection(db, 'chats');
@@ -882,7 +913,7 @@ export const AuthProvider = ({children}) => {
 
             snapshot.docChanges().forEach((change) => {
                 if (change.type === "added") {
-                    console.log("New Order: ", change.doc?.data(), change.doc?.data().status);
+                    // console.log("New Order: ", change.doc?.data(), change.doc?.data().status);
                     if(snapshot.size === 0){
                         setNovaOrder(null)
                     }else{
@@ -1021,7 +1052,7 @@ export const AuthProvider = ({children}) => {
                 }
             });
         });
-        console.log(`++++=====================`, unsubscribe)
+        // console.log(`++++=====================`, unsubscribe)
           
           // onSnapshot(q, querySnapshot => {
         // //  console.log('querySnapshot verificarOrderAberta', querySnapshot, querySnapshot.size)
@@ -1142,6 +1173,7 @@ export const AuthProvider = ({children}) => {
 
     const editarUltimaMensagem = async (idusuario) => {
         setLoading(true)
+        setNovaMsg(false)
         try {
             // imagemPerfil ? uploadImage(imagemPerfil, imageMeta) : '';
             // buscar a ultima mensagem 
@@ -1264,11 +1296,11 @@ export const AuthProvider = ({children}) => {
             console.log('Erro ao buscar localização ', error)
         }
     }
-    async function buscarMotoristaLivre(){
-        // console.log('buscarMotoristaLivre')
+    async function buscarMotoristaLivre(us){
+        console.log('buscarMotoristaLivre', us)
         try {
             setMotoristaLivre([])
-            const museums = query(collection(db, 'motoristas'), where("status", "==", 'Livre'));
+            const museums = query(collection(db, 'motoristas'), where("Cidade", "==", us.cidade), where("status", "==", 'Livre'));
             // const querySnapshot = await getDocs(museums);
             onSnapshot(museums, querySnapshot => {
                 var dadosMotoristas = []
@@ -1421,7 +1453,7 @@ export const AuthProvider = ({children}) => {
             querySnapshot.forEach((doc) => {
                 setConfig(doc.data())
                 res = doc.data()
-                //console.log('res config', res)
+                console.log('res config', res)
             });
         } catch (error) {
             console.log('Erro ao buscar config ', error)
@@ -1431,7 +1463,7 @@ export const AuthProvider = ({children}) => {
             const querySnapshot = await getDocs(q);
             // console.log('querySnapshot', querySnapshot, querySnapshot.size)
             querySnapshot.forEach((doc) => {
-                //console.log("buscarDadosUser =>", doc.id, " => ", doc.data());
+                // console.log("buscarDadosUser =>", doc.id, " => ", doc.data());
                 //updateUser(doc.id, {'nome': doc.data().name, 'contato': doc.data().contato })
                 setLoading(false)
                 setUser(doc.data())
@@ -1465,6 +1497,7 @@ export const AuthProvider = ({children}) => {
         // console.log('resssssss', res, token)
         await AsyncStorage.setItem('@RNAuth:user', JSON.stringify(
             {
+                'id': res.id,
                 'email': res.email,
                 'family_name': res.family_name,
                 'given_name': res.given_name,
@@ -1480,8 +1513,8 @@ export const AuthProvider = ({children}) => {
             }
         ))
 
-        console.log('Passou no addAsync')
-        carregarLocalizazao()
+        // console.log('Passou no addAsync')
+        carregarLocalizazao(res)
         
         // const value = await AsyncStorage.getItem('@RNAuth:user')
         // console.log('AsyncStorage.setItem', JSON.parse(value))

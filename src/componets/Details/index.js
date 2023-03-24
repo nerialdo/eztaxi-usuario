@@ -23,7 +23,8 @@ const Details = ({distancia, navigation, destination, duration, abrirConfirmacao
     setValor,
     setValorSemBonus,
     setValorBonus,
-    statusCorrida
+    statusCorrida,
+    user
   } = useAuth()
 
   // const [ selected, setSelected ] = useState(null)
@@ -32,7 +33,7 @@ const Details = ({distancia, navigation, destination, duration, abrirConfirmacao
   // const [ valorBonus, setValorBonus ] = useState(20)
 
   useEffect(() => {
-    buscarMotoristaLivre()
+    buscarMotoristaLivre(user)
     // console.log('*** motoristaLivre', motoristaLivre, distancia, yourLocation, destination)
 
   }, [])

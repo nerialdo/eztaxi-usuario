@@ -68,7 +68,7 @@ const Map = ({
     // );
 
     useEffect(() => {
-        buscarMotoristaLivre()
+        buscarMotoristaLivre(user)
     }, []);
 
     // useEffect(() => {
