@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext, useCallback, useRef } from "react";
 import { Alert, Vibration, Platform } from "react-native";
-// import { useToast } from 'native-base';
+import { useToast, Box, Text } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as AuthSession from 'expo-auth-session';
 import Constants from 'expo-constants';
@@ -96,6 +96,7 @@ Notifications.setNotificationHandler({
     
 export const AuthProvider = ({children}) => { 
     // console.log('childrenchildren', children)
+    const toast = useToast();
     const [user, setUser] = useState(null)
     const [loading, setLoading] = useState(true)
     const [loadi, setLoadi] = useState(false)
@@ -154,6 +155,8 @@ export const AuthProvider = ({children}) => {
     const [mudarLocalizacao, setMudarLocalizacao] = useState(null)
     const [statusCorrida, setStatusCorrida] = useState(null)
     const [minutodeEspera, setMinutodeEspera] = useState(2)
+    const [paraAvaliacao, setParaAvaliacao] = useState(null)
+    // const [avaliacaoCadastrada, setAvaliacaoCadastrada] = useState(null)
 
     const [request, response, promptAsync] = Google.useIdTokenAuthRequest(
         {
@@ -224,7 +227,7 @@ export const AuthProvider = ({children}) => {
     }, []);
 
     useEffect(() => {
-        setMotoristaLivre([])
+        // setMotoristaLivre([]) //desativei em 26/03/2023
     }, [expoPushToken])
     
     useEffect(() => {
@@ -242,6 +245,123 @@ export const AuthProvider = ({children}) => {
         // return () => verific().abort();
     }, [])
 
+    // async function buscarAvaliacao(idorder){
+    //     // console.log('dados historicoChats ', dados)
+    //     setAvaliacaoCadastrada(null)
+    //     try {
+    //         const q = query(collection(db, "avaliacao"), where('idOrder', '==', idorder));
+    //         const querySnapshot = await getDocs(q);
+    //         querySnapshot.forEach((doc) => {
+    //             // console.log(doc.id, ' => historicoCorridas ', doc.data());
+    //             console.log(' => avaliacao cadastrada ', doc.data());
+    //             // dadosChats.push({id: doc.id, data: doc.data()})
+    //             setAvaliacaoCadastrada(doc.data())
+    //         });
+
+    //     } catch (error) {
+    //         console.log('Erro ao buscar chats ', error)
+    //         alert('Erro ao historico chat' + error.toString())
+
+    //     }
+       
+    // }
+
+    async function atualizarAvaliacaoOrder(id){
+
+        try {
+            const userRef = await doc(db, "order", id);
+            await updateDoc(userRef, {
+                'avaliado': true
+            });
+            setParaAvaliacao(null)
+        } catch (error) {
+            console.log('Erro ao atualizarAvaliacaoOrder', error, error.response)
+            // alert('Erro ao cancelar corrida ' + error.toString())
+            // alert('Erro ao tentar cancelar, fale com o suporte')
+        }
+    }
+
+    async function salvarAvaliacao(dados, nota, t){
+        setLoading(true)
+        console.log('Salvando avaliacao #####################', dados, nota, t)
+        try {
+            // imagemPerfil ? uploadImage(imagemPerfil, imageMeta) : '';
+            const userRef = doc(db, "motoristas", dados.data.idMotorista);
+            await updateDoc(userRef, {
+                avaliacao: arrayUnion({
+                    idOrder: dados.id,
+                    idMotorista: dados.data.idMotorista,
+                    idCliente: dados.data.idCliente,
+                    nota: nota,
+                    avaliacao: t, 
+                    status: 'Ativo',
+                    data: Timestamp.fromDate(new Date()),
+                })
+            });
+            atualizarAvaliacaoOrder(dados.id)
+            // enviar notificacao para o motorista
+            schedulePushNotification(dados.data.dadosCorrida.tokenPush, 'Nova avaliação', 'Você recebeu uma avaliação com nota ' + nota)
+            toast.show({
+                render: () => {
+                    return <Box bg="emerald.500" px="2" py="1" rounded="sm" mb={5}>
+                            Avaliaçao adicionada com sucesso!
+                        </Box>;
+                }
+            });
+            setLoading(false)
+        } catch (error) {
+            setLoading(false)
+            // Alert.alert('Desculpe!', 'Tivemos um erro ao tentar adicionar sa avaliação. Por favor, tente novamente' )
+            toast.show({
+                render: () => {
+                    return <Box bg="red.500" px="2" py="1" rounded="sm" mb={5}>
+                        <Text fontSize="md" fontWeight="medium" flexShrink={1} color={"white"}>
+                        Encontramos um erro ao tentar adicionar sua avaliação. Por favor, tente novamente
+            </Text>
+                        </Box>
+                }
+            });
+
+            console.log('Erro ao salvar avaliacao', error, error.response)   
+        }
+       
+        // try {
+        //     await setDoc(doc(db, "avaliacao", dados.id), {
+        //         idOrder: dados.id,
+        //         idMotorista: dados.data.idMotorista,
+        //         idCliente: dados.data.idCliente,
+        //         nota: nota,
+        //         avaliacao: t, 
+        //         status: 'Ativo',
+        //         data: Timestamp.fromDate(new Date()),
+        //       });
+        //     // console.log(`avaliacao feita`, docRef.id)
+        //     setLoading(false)
+        //     toast.show({
+        //         render: () => {
+        //             return <Box bg="emerald.500" px="2" py="1" rounded="sm" mb={5}>
+        //                     Avaliaçao adicionada com sucesso!
+        //                 </Box>;
+        //         }
+        //     });
+
+        // } catch (error) {
+        //     setLoading(false)
+        //     // Alert.alert('Desculpe!', 'Tivemos um erro ao tentar adicionar sa avaliação. Por favor, tente novamente' )
+        //     toast.show({
+        //         render: () => {
+        //             return <Box bg="red.500" px="2" py="1" rounded="sm" mb={5}>
+        //                 <Text fontSize="md" fontWeight="medium" flexShrink={1} color={"white"}>
+        //                 Encontramos um erro ao tentar adicionar sua avaliação. Por favor, tente novamente
+        //     </Text>
+        //                 </Box>
+        //         }
+        //     });
+
+        //     console.log('Erro ao salvar avaliacao', error, error.response)    
+        // }
+    }
+
     const chamandoNovoMotorista = async (orderatual, useratual, motivo, nomecancelou) => {
         setShowCountdown(false)
         setNovaOrder(null)
@@ -257,6 +377,7 @@ export const AuthProvider = ({children}) => {
                 // buscar o motorista disponivel
                 const museums = query(collection(db, 'motoristas'), 
                 where("status", "==", 'Livre'), 
+                where("Cidade", "==", dadocorridaatual.dadosCorrida.Cidade),limit(1),
                 where("id", "!=", idmotoristaatual),limit(1),
                 where("tipoVeiculo", "==", dadocorridaatual.dadosCorrida.tipoVeiculo),limit(1),
                 );
@@ -307,7 +428,7 @@ export const AuthProvider = ({children}) => {
             
     
         } catch (error) {
-            console.log('Erro ao buscar motoristas livres ', error)
+            console.log('Erro ao buscar chamandoNovoMotorista ', error)
         }
     }
 
@@ -406,12 +527,12 @@ export const AuthProvider = ({children}) => {
     async function verific(){
         const token = await AsyncStorage.getItem('@RNAuth:token')
         if(token){
-            //console.log('token 1° useEffect', token)
+            // console.log('token 1° useEffect', token)
             userLogado(token)
         }else{
             console.log('Não está logado')
             setUser(null)
-            setCompletarPerfil(false)
+            // setCompletarPerfil(false)
             setLoading(false)
         }
     }
@@ -480,7 +601,7 @@ export const AuthProvider = ({children}) => {
               //   console.log('addressComponents', addressComponents)
                 let resCidadade = addressComponents.filter(addres => addres.types[0] === 'administrative_area_level_2')
                 let resEstado = addressComponents.filter(addres => addres.types[0] === 'administrative_area_level_1')
-                console.log(' resCidadade', resCidadade)
+                // console.log(' resCidadade', resCidadade)
                 setCidadeEstado({
                   'cidade' : resCidadade[0].long_name,
                   'estado' : resEstado[0].long_name
@@ -595,7 +716,7 @@ export const AuthProvider = ({children}) => {
             const querySnapshot = await getDocs(q);
             var dadosHistorico = []
             querySnapshot.forEach((doc) => {
-                console.log(doc.id, ' => historicoCorridas ', doc.data());
+                // console.log(doc.id, ' => historicoCorridas ', doc.data());
                 dadosHistorico.push({id: doc.id, data: doc.data()})
             });
             setHistorico(dadosHistorico.length === 0 ? null : dadosHistorico)
@@ -798,7 +919,7 @@ export const AuthProvider = ({children}) => {
                 const response = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?alt=json&access_token=${token}`);
                 const userInfo = await response.json();
                 // var texto = JSON.stringify(userInfo);
-                //console.log('dados do usuario logado', userInfo);
+                // console.log('dados do usuario logado', userInfo);
                 // alert('userLogado dados do usuario ' + texto)
                 setUser(userInfo)
                 if(userInfo.error?.status === 'UNAUTHENTICATED'){
@@ -910,7 +1031,7 @@ export const AuthProvider = ({children}) => {
             limit(1)
         );
         const unsubscribe = onSnapshot(q, (snapshot) => {
-
+            setParaAvaliacao(null)
             snapshot.docChanges().forEach((change) => {
                 if (change.type === "added") {
                     // console.log("New Order: ", change.doc?.data(), change.doc?.data().status);
@@ -975,6 +1096,13 @@ export const AuthProvider = ({children}) => {
                         }else if(change.doc?.data().status === 'FINALIZADO'){
                             setNovaOrder(null)
                             setShowCountdown(false)
+                            // verifica se a corrida já está avaliada, caso não esteja, redireciona para a página de avaliacao
+                            if(change.doc?.data().avaliado === false){
+                                setParaAvaliacao(dd)
+                                // navigation.navigate('Avaliacao',{
+                                //     dadoscorrida: change.doc?.data(),
+                                // });
+                            }
                         }else if(change.doc?.data().status === 'CANCELADO'){
                             setNovaOrder(null)
                             setShowCountdown(false)
@@ -1296,28 +1424,31 @@ export const AuthProvider = ({children}) => {
             console.log('Erro ao buscar localização ', error)
         }
     }
-    async function buscarMotoristaLivre(us){
-        console.log('buscarMotoristaLivre', us)
-        try {
-            setMotoristaLivre([])
-            const museums = query(collection(db, 'motoristas'), where("Cidade", "==", us.cidade), where("status", "==", 'Livre'));
-            // const querySnapshot = await getDocs(museums);
-            onSnapshot(museums, querySnapshot => {
-                var dadosMotoristas = []
-                // console.log('querySnapshot', querySnapshot.size)
-                if(querySnapshot.size === 0){
-                    setSemMotorista(false)
-                }else {
-                    querySnapshot.forEach((doc) => {
-                        //console.log(doc.id, ' => ********** buscarMotoristaLivre', doc.data());
-                        dadosMotoristas.push(doc.data())
-                    });
-                    setMotoristaLivre(dadosMotoristas)
-                }
-            });
-    
-        } catch (error) {
-            console.log('Erro ao buscar motoristas livres ', error)
+    async function buscarMotoristaLivre(us = user){
+        console.log('buscarMotoristaLivre', us.cidade)
+        var dadosMotoristas = []
+        if(us.cidade){
+            try {
+                setMotoristaLivre([])
+                const museums = query(collection(db, 'motoristas'), where("Cidade", "==", us.cidade), where("status", "==", 'Livre'));
+                // const querySnapshot = await getDocs(museums);
+                onSnapshot(museums, querySnapshot => {
+                    
+                    // console.log('querySnapshot', querySnapshot.size)
+                    if(querySnapshot.size === 0){
+                        setSemMotorista(false)
+                    }else {
+                        querySnapshot.forEach((doc) => {
+                            console.log(doc.id, ' => ********** buscarMotoristaLivre', doc.data());
+                            dadosMotoristas.push(doc.data())
+                        });
+                        setMotoristaLivre(dadosMotoristas)
+                    }
+                });
+        
+            } catch (error) {
+                console.log('Erro ao buscar motoristas livres ', error)
+            }
         }
     }
 
@@ -1453,7 +1584,7 @@ export const AuthProvider = ({children}) => {
             querySnapshot.forEach((doc) => {
                 setConfig(doc.data())
                 res = doc.data()
-                console.log('res config', res)
+                // console.log('res config', res)
             });
         } catch (error) {
             console.log('Erro ao buscar config ', error)
@@ -1464,7 +1595,7 @@ export const AuthProvider = ({children}) => {
             // console.log('querySnapshot', querySnapshot, querySnapshot.size)
             querySnapshot.forEach((doc) => {
                 // console.log("buscarDadosUser =>", doc.id, " => ", doc.data());
-                //updateUser(doc.id, {'nome': doc.data().name, 'contato': doc.data().contato })
+                // updateUser(doc.id, {'nome': doc.data().name, 'contato': doc.data().contato })
                 setLoading(false)
                 setUser(doc.data())
                 addAsync(doc.data())
@@ -1476,10 +1607,14 @@ export const AuthProvider = ({children}) => {
                     }
                 }
 
+                // console.log("buscarDadosUser => 2", doc.data());
                 if(!doc.data().name || !doc.data().contato){
                     setCompletarPerfil(true)
+                    // console.log("buscarDadosUser => 3", doc.data());
                 }else{
+                    setCompletarPerfil(false)
                     setUser(doc.data())
+                    // console.log("buscarDadosUser => 4", doc.data());
                 }
             });
 
@@ -1522,7 +1657,7 @@ export const AuthProvider = ({children}) => {
     }
 
     async function saveProfile(info, token=expoPushToken, provedor){
-        console.log('Salvando dados do usuario aqui', token)
+        // console.log('Salvando dados do usuario aqui', token)
         // console.log('Info', info, info.id)
         try {
             const q = query(collection(db, "users"), where("id", "==", info.id));
@@ -1641,13 +1776,13 @@ export const AuthProvider = ({children}) => {
                 const response = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?alt=json&access_token=${token}`);
                 const userInfo = await response.json();
                 var texto = JSON.stringify(userInfo);
-                console.log('dados do usuario', texto, userInfo);
+                // console.log('dados do usuario', texto, userInfo);
                 await AsyncStorage.setItem('@RNAuth:token', token)
                 // alert('dados do usuario loadProfile' + texto)
                 // addAsync(userInfo)
                 saveProfile(userInfo, expoPushToken, provedor)
-                setUser(userInfo)
-                // buscarDadosUser(userInfo.id)
+                // setUser(userInfo)
+                buscarDadosUser(userInfo.id)
                 setLoading(false)
             } catch (error) {
                 console.log('Erro loadProfile ', error, error.toString())
@@ -1688,6 +1823,7 @@ export const AuthProvider = ({children}) => {
         try {
             // promptAsync()
             console.log('Logando ....')
+            
             const CLIENT_ID = '741352224001-9b8pjmsf756mtitpjdfes7092310ar0j.apps.googleusercontent.com';
             // const CLIENT_ID = '1054676875897-p7mp2adga61ph9nk9kromupplhbhofls.apps.googleusercontent.com';
             const REDIRECT_URI = 'https://auth.expo.io/@nerialdo/eztaxi';
@@ -1710,6 +1846,8 @@ export const AuthProvider = ({children}) => {
             }
     
             if(type === 'success'){
+                setUser(true)
+                await AsyncStorage.setItem('@RNAuth:token', params.access_token)
                 loadProfile(params.access_token, 'google')
             }
             
@@ -1940,7 +2078,12 @@ export const AuthProvider = ({children}) => {
             chamandoNovoMotorista,
             statusCorrida,
             minutodeEspera,
-            ultimaMessages
+            ultimaMessages,
+            salvarAvaliacao,
+            paraAvaliacao,
+            atualizarAvaliacaoOrder
+            // buscarAvaliacao,
+            // avaliacaoCadastrada
         }}>
             {children}
         </AuthContext.Provider>

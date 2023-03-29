@@ -7,6 +7,7 @@ import Chats from "../pages/Chats";
 import Checkout from "../pages/Checkout";
 import Confirmacao from "../pages/Confirmacao";
 import Chat from "../pages/Chat";
+import Avaliacao from "../pages/Avaliacao";
 import { Button, Icon } from "native-base";
 import { Ionicons } from "@expo/vector-icons"
 
@@ -92,6 +93,14 @@ const AppRoutes = () => (
                     >
                     </Button>
                 )
+            })}
+        />
+        <AppStack.Screen
+            name="Avaliacao" 
+            component={Avaliacao} 
+            // options={({ navigation }) => console.log('nav ', navigation)}
+            options={({ navigation }) => ({
+                headerShown:false,
             })}
         />
         {/* <AppStack.Screen

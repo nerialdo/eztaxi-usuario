@@ -20,7 +20,8 @@ import {
   FlatList,
   HStack,
   Box,
-  Spacer
+  Spacer,
+  Badge
 } from "native-base";
 import {useAuth} from '../../contexts/auth';
 import { getAuth, updatePassword, reauthenticateWithCredential } from "firebase/auth";
@@ -49,7 +50,7 @@ const Historico = ({ navigation }) => {
       historicoCorridas(user.id)
     });
 
-    console.log('historico ', historico)
+    // console.log('historico ', historico)
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
   }, [navigation]);
@@ -75,47 +76,6 @@ const Historico = ({ navigation }) => {
     });
   }
 
-  // useEffect(() => {
-  //   setData(historico)
-  // }, []);
-
-  //   // Return the function to unsubscribe from the event so it gets removed on unmount
-  //   return unsubscribe;
-  // }, [navigation]);
-  // const data = [
-  //   {
-  //     id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
-  //     fullName: "Aafreen Khan",
-  //     timeStamp: "12:47 PM",
-  //     recentText: "Good Day!",
-  //     avatarUrl: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"
-  //   }, {
-  //     id: "3ac68afc-c605-48d3-a4f8-fbd91aa97f63",
-  //     fullName: "Sujitha Mathur",
-  //     timeStamp: "11:11 PM",
-  //     recentText: "Cheer up, there!",
-  //     avatarUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyEaZqT3fHeNrPGcnjLLX1v_W4mvBlgpwxnA&usqp=CAU"
-  //   }, {
-  //     id: "58694a0f-3da1-471f-bd96-145571e29d72",
-  //     fullName: "Anci Barroco",
-  //     timeStamp: "6:22 PM",
-  //     recentText: "Good Day!",
-  //     avatarUrl: "https://miro.medium.com/max/1400/0*0fClPmIScV5pTLoE.jpg"
-  //   }, {
-  //     id: "68694a0f-3da1-431f-bd56-142371e29d72",
-  //     fullName: "Aniket Kumar",
-  //     timeStamp: "8:56 PM",
-  //     recentText: "All the best",
-  //     avatarUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSr01zI37DYuR8bMV5exWQBSw28C1v_71CAh8d7GP1mplcmTgQA6Q66Oo--QedAN1B4E1k&usqp=CAU"
-  //   }, 
-  //   {
-  //     id: "28694a0f-3da1-471f-bd96-142456e29d72",
-  //     fullName: "Kiara",
-  //     timeStamp: "12:47 PM",
-  //     recentText: "I will call today.",
-  //     avatarUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBwgu1A5zgPSvfE83nurkuzNEoXs9DMNr8Ww&usqp=CAU"
-  //   }
-  // ];
 
   useEffect(() => {
     // console.log('User', user)
@@ -133,10 +93,6 @@ const Historico = ({ navigation }) => {
     });
   }
 
-
-  // const onSubmit = (data) => {
-  //   updateUser(user.id, data)
-  // };
 
 
   const convertDate = (userDate) => {
@@ -162,6 +118,12 @@ const Historico = ({ navigation }) => {
         }
       }
     }
+  }
+
+  const abrirAvaliacao = (dadoscorrida) => {
+    navigation.navigate('Avaliacao',{
+      dadoscorrida: dadoscorrida,
+    });
   }
   
   const fetchData = () => {
@@ -224,6 +186,7 @@ const Historico = ({ navigation }) => {
                       py="2"
                       marginBottom={2}
                       // backgroundColor='coolGray.100'
+                      width={'100%'}
                       backgroundColor={item.data.status === 'Aberto' ? 'teal.100' : 'coolGray.100'}
                     >
                         <TouchableOpacity
@@ -236,8 +199,8 @@ const Historico = ({ navigation }) => {
                             space={3} 
                             justifyContent="space-between" 
                             alignItems={'center'}
-                            
                             backgroundColor={'red'}
+                            paddingRight={100}
                           >
                             {/* <Avatar size="48px" source={{
                               uri: item.data.dadosCorrida.picture ? item.data.dadosCorrida.picture : 'https://eztaxi.com.br/wp-content/uploads/2022/10/cropped-icon.jpg'
@@ -256,8 +219,8 @@ const Historico = ({ navigation }) => {
                             >
                               EZ
                             </Avatar>
-                            <VStack>
-                              <Text>
+                            <VStack style={{ width: '70%'}}>
+                              <Text >
                                 {item.data.dadosCorrida.nome}
                               </Text>
                               <Text style={{fontWeight: 'bold'}}>
@@ -285,39 +248,28 @@ const Historico = ({ navigation }) => {
                           </HStack>
                           <HStack space={3}marginTop={1} padding={1} justifyContent="center" alignItems={'center'}>
                               {item.data.status === 'PENDENTE' && (
-                                <Text>
-                                  Aguardando o motorista aceitar
-                                </Text>
+                                <Badge >Corrita foi aceita pelo motorista.</Badge>
                               )}
                               {item.data.status === 'ACEITOU' && (
-                                <Text>
-                                  Corrita foi aceita pelo motorista
-                                </Text>
+                                <Badge colorScheme="info">Corrita foi aceita pelo motorista.</Badge>
                               )}
                               {item.data.status === 'BUSCANDOPASSAGEIRO' && (
-                                <Text>
-                                  Motista a caminho de sua posição atual.
-                                </Text>
+                                <Badge colorScheme="info">Motista a caminho de sua posição atual.</Badge>
                               )}
                               {item.data.status === 'PEGOUPASSAGEIRO' && (
-                                <Text>
-                                  Você já está no veículo
-                                </Text>
+                                <Badge colorScheme="info">Você já está no veículo.</Badge>
                               )}
                               {item.data.status === 'FINALIZADO' && (
-                                <Text>
-                                  Corrida finalizada
-                                </Text>
+                                <Badge colorScheme="success">Corrida finalizada.</Badge>
                               )}
-                              {item.data.status === 'RECUSOU' && (
-                                <Text>
-                                  O Motorista cancelou esta corrida
-                                </Text>
+                              {item.data.status === 'RECUSADO' && (
+                                <Badge colorScheme="danger">O Motorista cancelou esta corrida.</Badge>
                               )}
                               {item.data.status === 'CANCELADO' && (
-                                <Text>
-                                  Corrida cancelada
-                                </Text>
+                                <Badge colorScheme="danger">Corrida cancelada.</Badge>
+                              )}
+                              {item.data.taximetro && (
+                                <Badge colorScheme="success" alignSelf="center" >Taxímentro</Badge>
                               )}
                           </HStack>
                           {/* {item.data.aceite === null && (
@@ -356,6 +308,7 @@ const Historico = ({ navigation }) => {
           abrirModal={abrirModal}
           selected={selected}
           chamarTelaChat={chamarTelaChat}
+          abrirAvaliacao={abrirAvaliacao}
         />
       )}
       {loadi && (

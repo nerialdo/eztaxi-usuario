@@ -2,7 +2,7 @@ import React from "react";
 
 import { StyleSheet, View, ActivityIndicator, Text, Platform, TouchableOpacity } from "react-native";
 
-import { Avatar, Center} from "native-base";
+import { Avatar, Center, Box, Modal, Button} from "native-base";
 
 import {useAuth} from "../contexts/auth";
 
@@ -16,6 +16,8 @@ import Stagger from "../componets/Stagger";
 
 import CorridaAberta from "../pages/CorridaAberta";
 
+import Avaliacao from "../pages/Avaliacao";
+
 import Perfil from "../pages/Perfil";
 
 // import AlertStatusPedido from "../componets/AlertStatusPedido";
@@ -25,7 +27,8 @@ import Perfil from "../pages/Perfil";
 
 const Routes = () => {
     const { 
-        signed, 
+        signed,
+        user, 
         loading, 
         novaOrder, 
         aceite, 
@@ -34,9 +37,10 @@ const Routes = () => {
         novaMsg,
         completarPerfil,
         ultimaMessages,
-        editarUltimaMensagem
+        editarUltimaMensagem,
+        paraAvaliacao
     } = useAuth()
-    console.log('novaMsgnovaMsgnovaMsgnovaMsg ', novaMsg)
+    // console.log('novaMsgnovaMsgnovaMsgnovaMsg ', novaMsg)
     // console.log("loading page Routes", signed, loading, novaOrder, aceite, orderStatus)
     // console.log("loading page Routes", signed, loading, novaOrder, aceite, orderStatus)
     // console.log("loading page Routes", signed, loading, novaOrder)
@@ -48,6 +52,24 @@ const Routes = () => {
             </View>
         )
     }
+
+    // if(paraAvaliacao){
+
+    //         return (
+    //             <View style={styles.container}>
+    //                 <Modal isOpen={true} >
+    //                     <Modal.Content>
+    //                         <Modal.Body>
+    //                             <View>
+
+    //                             </View>
+    //                         </Modal.Body>
+    //                     </Modal.Content>
+    //                 </Modal>
+    //             </View>
+    //         )
+  
+    // }
    
     if(novaMsg){
         return (
@@ -80,16 +102,23 @@ const Routes = () => {
         )
     }
 
-    if(novaOrder){
-        return (
-            <View style={styles.container}>
-                <CorridaAberta />
-            </View>
-        )
-    }
+    // if(paraAvaliacao){
+    //     return (
+    //         <View style={styles.container}>
+    //             <Avaliacao />
+    //         </View>
+    //     )
+    // }
+    // if(novaOrder){
+    //     return (
+    //         <View style={styles.container}>
+    //             <CorridaAberta />
+    //         </View>
+    //     )
+    // }
 
 
-    return signed ? 
+    return user ? 
         <>
         <AppRoutes />
 

@@ -11,14 +11,14 @@ import styled, { css } from 'styled-components/native';
 // import Geocoder from 'react-native-geocoding';
 import Details from '../../componets/Details';
 // import Esperando from '../../componets/Esperando';
-// import { MaterialCommunityIcons, AntDesign, Entypo } from "@expo/vector-icons"
-import { Text, Button } from "native-base";
-
+import { Text, Icon, Avatar } from "native-base";
+import {Ionicons, FontAwesome5} from "@expo/vector-icons"
 import { useAuth } from '../../contexts/auth';
 // import Checkout from '../../pages/Checkout';
 import MapView, { Marker, PROVIDER_GOOGLE }from "react-native-maps";
 import car2Png from '../../../assets/car-2-a.png';
 import motoPng from '../../../assets/moto.png';
+import { rating } from '../../services/rating';
 
 // Geocoder.init("AIzaSyA5E67B45xsd69Z2SKIhWuVbVlb736lWvk"); 
 
@@ -41,7 +41,8 @@ const Map = ({
         handleLocationMudadoSelected,
         destination,
         handleLocationPoiClick,
-        handleBack
+        handleBack,
+        paraAvaliacao
     } = useAuth()
     
     // const isFocused = useIsFocused();
@@ -68,7 +69,14 @@ const Map = ({
     // );
 
     useEffect(() => {
-        buscarMotoristaLivre(user)
+        setTimeout(() => {
+            console.log('dadsadasd')
+            if(paraAvaliacao){
+                navigation.navigate('Avaliacao',{
+                    dadoscorrida: paraAvaliacao,
+                });
+            }
+          }, 3000);
     }, []);
 
     // useEffect(() => {
@@ -236,6 +244,7 @@ const Map = ({
 
     return (
         <View style={styles.container}>
+            {/* <Text>{motoristaLivre.length}-</Text> */}
             {region && (
                 <MapView
                     style={styles.map}
@@ -320,6 +329,27 @@ const Map = ({
                             title={item.nome}
                             rotation={0}
                         >
+                                <View style={{marginTop: 5, padding: 10, display: 'flex', flexDirection: 'row', marginLeft: 0, width: 100}}>
+                                    <Avatar bg="green.500" alignSelf="center" size="sm" source={{
+                                        uri: item?.picture
+                                    }}></Avatar>
+                                    {item.avaliacao && (
+                                        <Text style={{marginTop: 10, fontSize: 16,padding: 10}}>
+                                            {rating(item.avaliacao)}
+                                            <Icon
+                                                as={Ionicons}
+                                                name="star"
+                                                color="coolGray.800"
+                                                style={{width: 30, marginTop: 4}}
+                                                size={3}
+                                                _dark={{
+                                                color: "warmGray.50",
+                                                }}
+                                            />
+                                        </Text>
+                                    )}
+                                </View>
+
                         </Marker>
                      ))}
                 </MapView>

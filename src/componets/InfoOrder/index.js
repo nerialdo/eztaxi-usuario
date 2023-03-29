@@ -15,12 +15,14 @@ import {
   Icon,
   Circle,
   Modal,
-  Button
+  Button,
+  Badge
 } from "native-base";
 import {AntDesign, EvilIcons, FontAwesome5, MaterialIcons, Ionicons} from "@expo/vector-icons"
 import {useAuth} from '../../contexts/auth';
 import MapView from 'react-native-maps';
 import * as Location from 'expo-location';
+import format from 'date-fns/format';
 
 import Map from '../Map';
 import MyMenu from '../Menu';
@@ -30,7 +32,8 @@ const Checkout = ({
   showModal, 
   abrirModal,
   selected,
-  chamarTelaChat
+  chamarTelaChat,
+  abrirAvaliacao
  }) => {
   const {user} = useAuth()
   const [menuTop, setMenuTop] = useState(true)
@@ -39,7 +42,7 @@ const Checkout = ({
   const windowHeight = Dimensions.get('window').height;   
   
   // const { colors } = useTheme()
-  // console.log('dadosCorridadadosCorrida', showModal, selected)
+  console.log('dadosCorridadadosCorrida', showModal, selected)
   // useEffect(() => {
   //   // setRegion({
   //   //   latitude: 37.78825,
@@ -49,6 +52,10 @@ const Checkout = ({
   //   // })
   // }, [])
 
+
+  const convertDate = (userDate) => {
+    return new Date(userDate.seconds*1000).toLocaleDateString()
+  }
 
   function moedaBR(amount, decimalCount = 2, decimal = ",", thousands = "."){
     try {
@@ -90,10 +97,11 @@ const Checkout = ({
                   alignItems="center" 
                   justifyContent="center" 
                   flexDirection={'column'}
-                  background='green.900'
+                  // background='green.900'
                   padding='1'
                 >
-                  <Text fontWeight="medium" color='white'>Aguardando o motorista aceitar</Text>
+                  <Badge colorScheme="warning">Aguardando o motorista aceitar</Badge>
+                  {/* <Text fontWeight="medium" color='white'>Aguardando o motorista aceitar</Text> */}
                 </HStack>
               )}
               {selected.data.status === 'ACEITOU' && (
@@ -101,10 +109,12 @@ const Checkout = ({
                   alignItems="center" 
                   justifyContent="center" 
                   flexDirection={'column'}
-                  background='blue.700'
+                  // background='blue.700'
                   padding='1'
                 >
-                  <Text fontWeight="medium" color='white'>Corrita foi aceita pelo motorista</Text>
+                  
+                  <Badge colorScheme="success">Corrita foi aceita pelo motorista</Badge>
+                  {/* <Text fontWeight="medium" color='white'>Corrita foi aceita pelo motorista</Text> */}
                 </HStack>
               )}
               {selected.data.status === 'BUSCANDOPASSAGEIRO' && (
@@ -112,10 +122,11 @@ const Checkout = ({
                   alignItems="center" 
                   justifyContent="center" 
                   flexDirection={'column'}
-                  background='blue.700'
+                  // background='blue.700'
                   padding='1'
                 >
-                  <Text fontWeight="medium" color='white'>Motista a caminho de sua posição atual.</Text>
+                  <Badge colorScheme="info">Motista a caminho de sua posição atual.</Badge>
+                  {/* <Text fontWeight="medium" color='white'>Motista a caminho de sua posição atual.</Text> */}
                 </HStack>
               )}
               {selected.data.status === 'PEGOUPASSAGEIRO' && (
@@ -123,10 +134,11 @@ const Checkout = ({
                   alignItems="center" 
                   justifyContent="center" 
                   flexDirection={'column'}
-                  background='blue.700'
+                  // background='blue.700'
                   padding='1'
                 >
-                  <Text fontWeight="medium" color='white'>Você já está no veículo</Text>
+                  <Badge colorScheme="info">Você já está no veículo</Badge>
+                  {/* <Text fontWeight="medium" color='white'>Você já está no veículo</Text> */}
                 </HStack>
               )}
               {selected.data.status === 'FINALIZADO' && (
@@ -134,21 +146,23 @@ const Checkout = ({
                   alignItems="center" 
                   justifyContent="center" 
                   flexDirection={'column'}
-                  background='green.700'
+                  // background='green.700'
                   padding='1'
                 >
-                  <Text fontWeight="medium" color='white'>Corrida finalizada</Text>
+                  <Badge colorScheme="success">Corrida finalizada</Badge>
+                  {/* <Text fontWeight="medium" color='white'>Corrida finalizada</Text> */}
                 </HStack>
               )}
-              {selected.data.status === 'RECUSOU' && (
+              {selected.data.status === 'RECUSADO' && (
                 <HStack 
                   alignItems="center" 
                   justifyContent="center" 
                   flexDirection={'column'}
-                  background='red.700'
+                  // background='red.700'
                   padding='1'
                 >
-                  <Text fontWeight="medium" color='white'>O Motorista cancelou esta corrida</Text>
+                  <Badge colorScheme="error">O Motorista recusou esta corrida</Badge>
+                  {/* <Text fontWeight="medium" color='white'>O Motorista cancelou esta corrida</Text> */}
                 </HStack>
               )}
               {selected.data.status === 'CANCELADO' && (
@@ -156,12 +170,14 @@ const Checkout = ({
                   alignItems="center" 
                   justifyContent="center" 
                   flexDirection={'column'}
-                  background='red.700'
+                  // background='red.700'
                   padding='1'
                 >
-                  <Text fontWeight="medium" color='white'>Corrida cancelada</Text>
+                  <Badge colorScheme="error">Corrida cancelada</Badge>
+                  {/* <Text fontWeight="medium" color='white'>Corrida cancelada</Text> */}
                 </HStack>
               )}
+              
               <HStack alignItems="center" justifyContent="center" flexDirection={'column'}>
                 <Text fontWeight="light">Motorista</Text>
                 <Text fontWeight="medium">{selected.data.dadosCorrida.nome}</Text>
@@ -182,17 +198,33 @@ const Checkout = ({
                 <Text color="blueGray.400">Crédito</Text>
               </HStack> */}
               <HStack alignItems="center" justifyContent="space-between">
+                <Text fontWeight="medium">Data</Text>
+                <Text color="blueGray.400">{convertDate(selected.data.data)}</Text>
+              </HStack>
+              <HStack alignItems="center" justifyContent="space-between">
                 <Text fontWeight="medium">Veículo</Text>
-                <Text color="blueGray.400">{selected.data.dadosCorrida.veiculos.modelo}-{selected.data.dadosCorrida.veiculos.marca}</Text>
+                <Text color="blueGray.400">{selected.data.dadosCorrida.veiculos[0].modelo}-{selected.data.dadosCorrida.veiculos[0].marca}</Text>
               </HStack>
               <HStack alignItems="center" justifyContent="space-between">
                 <Text fontWeight="medium">Placa</Text>
-                <Text color="blueGray.400">{selected.data.dadosCorrida.veiculos.placa}</Text>
+                <Text color="blueGray.400">{selected.data.dadosCorrida.veiculos[0].placa}</Text>
               </HStack>
               <HStack alignItems="center" justifyContent="space-between">
                 <Text fontWeight="medium">Kilometros</Text>
                 <Text color="blueGray.400">{selected.data.distancia} km</Text>
               </HStack>
+              {selected.data.taximetro && (
+                <HStack alignItems="center" justifyContent="space-between">
+                  <Text fontWeight="medium">Valor do taxímetro</Text>
+                  <Text color="green.500">R$ {moedaBR(selected.data.valorTaximentro)}</Text>
+                </HStack>
+              )}
+              {selected.data.taximetro && (
+                <HStack alignItems="center" justifyContent="space-between">
+                  <Text fontWeight="medium">Valor sem taxímetro</Text>
+                  <Text color="green.500">R$ {moedaBR(selected.data.valorSemBonus)}</Text>
+                </HStack>
+              )}
               <HStack alignItems="center" justifyContent="space-between">
                 <Text fontWeight="medium">Valor</Text>
                 <Text color="green.500">R$ {moedaBR(selected.data.valor)}</Text>
@@ -207,6 +239,25 @@ const Checkout = ({
               </HStack> */}
             </VStack>
           </Modal.Body>
+          {selected.data.status === 'FINALIZADO' &&  (
+            <Modal.Footer>
+              <Button 
+                colorScheme="primary"
+                style={{
+                  display: 'flex',
+                  justifyContent:'center',
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  width: '100%',
+                }}
+                onPress={() => {
+                  abrirAvaliacao(selected)
+                }}
+              >
+                Avaliação do motorista
+              </Button>
+            </Modal.Footer>
+          )}
           {selected.data.status === 'Aberta' && selected.data.aceite === true &&  (
             <Modal.Footer>
               <Button 

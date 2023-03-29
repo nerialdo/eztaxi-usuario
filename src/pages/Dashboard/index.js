@@ -21,7 +21,7 @@ import MyMenu from '../../componets/Menu';
 import styled, { css } from 'styled-components/native';
 
 const Dashboard = ({ navigation, route }) => {
-  const {user} = useAuth()
+  const {buscarMotoristaLivre, user} = useAuth()
   const [menuTop, setMenuTop] = useState(true)
   const [showMenu, seShowMenu] = useState(false)
   
@@ -32,16 +32,17 @@ const Dashboard = ({ navigation, route }) => {
     navigation.push(tela);
   }
 
-  // useEffect(() => {
-  //   // navigation.toggleDrawer();
-  //   // setRegion({
-  //   //   latitude: 37.78825,
-  //   //   longitude: -122.4324,
-  //   //   latitudeDelta: 0.0922,
-  //   //   longitudeDelta: 0.0421,
-  //   // })
+  useEffect(() => {
+    buscarMotoristaLivre(user)
+    // navigation.toggleDrawer();
+    // setRegion({
+    //   latitude: 37.78825,
+    //   longitude: -122.4324,
+    //   latitudeDelta: 0.0922,
+    //   longitudeDelta: 0.0421,
+    // })
 
-  // }, [])
+  }, [])
 
   // const handleMenuTop = () => {
   //   // setMenuTop(!menuTop)

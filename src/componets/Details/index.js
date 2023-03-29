@@ -6,6 +6,7 @@ import { Text, Icon, Avatar, HStack, Spinner, Heading, Center} from "native-base
 import {Ionicons, FontAwesome5} from "@expo/vector-icons"
 import { useAuth } from '../../contexts/auth';
 import enZA from 'date-fns/esm/locale/en-ZA/index.js';
+import { rating } from '../../services/rating';
 
 const Details = ({distancia, navigation, destination, duration, abrirConfirmacao, yourLocation}) => {
 
@@ -183,6 +184,9 @@ const Details = ({distancia, navigation, destination, duration, abrirConfirmacao
                 <Text style={{fontWeight:'bold', fontSize: 16}}>
                   {item?.tipoVeiculo} {item.delivery === 'Sim' ? '- Faz entregas' : ''}
                 </Text>
+                {/* <Text style={{fontWeight:'bold', fontSize: 16}}>
+                  {item?.tipoVeiculo} {item.delivery === 'Sim' ? '- Faz entregas' : ''} {rating()}
+                </Text> */}
                 <View style={styles.subDetalhesCarro}>
                   <Text style={{fontWeight:'bold', fontSize: 13}}>
                     {/* {definirVeiculo(item.veiculos).categoria}  */}
@@ -270,7 +274,17 @@ const Details = ({distancia, navigation, destination, duration, abrirConfirmacao
               </View>
               <View style={styles.detalhesCarro}>
                 <View style={styles.subDetalhesCarro}>
-                  <Text style={{fontWeight:'bold'}}>{item.nome}</Text><Text></Text>
+                  <Text style={{fontWeight:'bold'}}>{item.nome}  {rating(item.avaliacao) ? rating(item.avaliacao) : 0}</Text>
+                  <Icon
+                    as={Ionicons}
+                    name="star"
+                    color="coolGray.800"
+                    style={{width: 30, marginTop: 4}}
+                    size={3}
+                    _dark={{
+                      color: "warmGray.50",
+                    }}
+                  />
                 </View>
                 <View style={styles.subDetalhesCarro}>
                   {/* <Icon
